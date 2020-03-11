@@ -10,8 +10,10 @@
 <v t="amd.20150311165615.5"><vh>@data qt-gui-plugin-style-sheet</vh></v>
 <v t="amd.20150311165615.6"><vh>@string initial_split_orientation = horizontal</vh></v>
 </v>
-<v t="amd.20150313083555.45"><vh>有關本專案</vh></v>
+<v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
+<v t="leo.20200311104947.1"><vh>use pybean.py to connect to SQLite</vh></v>
+<v t="leo.20200311104223.1"><vh>use peewee to connect to SQLite</vh></v>
 <v t="amd.20150311165615.9"><vh>@path ./</vh>
 <v t="amd.20151020231829.1"><vh>@edit .gitignore</vh></v>
 <v t="leo.20200311090825.1"><vh>@edit README.md</vh></v>
@@ -151,9 +153,9 @@ QLineEdit#editorLabel {
 <t tx="amd.20150311165615.6">horizontal: body pane to the left
 vertical: body pane on the botton</t>
 <t tx="amd.20150311165615.9"></t>
-<t tx="amd.20150313083555.45">Python 與  Flask 在協同產品機械設計上的應用
+<t tx="amd.20150313083555.45">Application of Python and Flask on the colloaborative mechanical design.
 
-2020.03.11 啟動
+Stared on March 11, 2020
 </t>
 <t tx="amd.20151020232112.1"># setup static directory
 @app.route('/static/&lt;path:path&gt;')
@@ -232,5 +234,114 @@ def docheck():
 y:\msys64\mingw64\bin\openssl.exe
 
 openssl req -x509 -nodes -days 600 -newkey rsa:2048 -keyout cd2020.key -out cd2020.crt</t>
+<t tx="leo.20200311104223.1">https://github.com/coleifer/peewee</t>
+<t tx="leo.20200311104947.1">https://github.com/mdecourse/wcms-scrum1
+
+Pybean reference:
+
+https://github.com/jonathan-kosgei/pybean
+
+https://github.com/johndoe46/PyBean
+
+from pybean import Store, SQLiteWriter
+library = Store(SQLiteWriter(":memory:", frozen=False))
+book = library.new("book")
+book.title = "Boost development with pybean"
+book.author = "Charles Xavier"
+library.save(book)
+for book in library.find("book","author like ?",["Charles Xavier"]):
+        print book.title
+library.delete(book)
+library.commit()
+
+To Create a new database table
+
+pybean.setup()
+book = pybean.dispense(bean_type)
+pybean.db.commit()
+pybean.close()
+
+To store data in a database table
+
+pybean.setup()
+bean_type = 'book'
+bookone.name = 'Eragon'
+bookone.author = 'Christopher Paolini'
+bean_id = pybean.store(bookone)
+pybean.db.commit()
+
+To load data from a database table
+
+pybean.setup()
+bean_type = 'book'
+bookone = pybean.dispense(bean_type)
+bookone.name = 'Eldest'
+bookone.author = 'Christopher Paolini'
+bean_id = pybean.store(bookone)
+bean = pybean.load(bean_type, bean_id)
+#print(bean)
+
+To enter multiple rows in a database table
+
+pybean.setup()
+bean_type1 = 'movies'
+bean_type2 = 'books'
+beans = pybean.dispenseAll(bean_type1, bean_type2)
+pybean.db.commit()
+
+To load multiple rows from a database table
+
+pybean.setup()
+bean_type = 'book'
+book = pybean.dispense(bean_type)
+book.title = 'The Inheritance'
+id1 = pybean.store(book)
+page = pybean.dispense(bean_type)
+page.number = 145
+id2 = pybean.store(page)
+#print(id2, page)
+beans = pybean.loadAll(bean_type, id1, id2)
+#print(beans)
+pybean.close()
+
+To delete a row in a database table
+
+pybean.setup()
+bean_type = 'book'
+bookone = pybean.dispense(bean_type)
+bookone.name = 'Eldest'
+bookone.author = 'Christopher Paolini'
+id = pybean.store(bookone)
+pybean.trash(bookone.type, id)
+pybean.close()
+
+To delete multiple rows in a database table
+
+pybean.setup()
+bean_type1 = 'book'
+bean_type2 = 'book'
+beans = pybean.dispenseAll(bean_type1, bean_type2)
+beans[0].name = 'The Man from St.Petersburg'
+beans[1].name = 'Preface'
+id1 = pybean.store(beans[0])
+id2 = pybean.store(beans[1])
+pybean.trashAll('book', id1, id2)
+pybean.close()
+
+To delete a database table
+
+pybean.setup()
+cursor = pybean.db.cursor()
+bean_type = 'book'
+book = pybean.dispense(bean_type)
+book.title = 'Head Fist C#'
+id = pybean.store(book)
+pybean.wipe('book')
+pybean.close()
+
+To delete an entire database
+
+pybean.setup()
+pybean.nuke()</t>
 </tnodes>
 </leo_file>

@@ -11,6 +11,7 @@
 <v t="amd.20150311165615.6"><vh>@string initial_split_orientation = horizontal</vh></v>
 </v>
 <v t="amd.20150313083555.45"><vh>有關本專案</vh></v>
+<v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
 <v t="amd.20150311165615.9"><vh>@path ./</vh>
 <v t="amd.20151020231829.1"><vh>@edit .gitignore</vh></v>
 <v t="leo.20200311090825.1"><vh>@edit README.md</vh></v>
@@ -226,5 +227,10 @@ def docheck():
         return "猜了 "+str(thecount)+" 次, 終於猜對了, 正確答案為 "+str(theanswer)+": &lt;a href='/'&gt;再猜&lt;/a&gt;"
     return render_template("docheck.html", guess=guess)
  </t>
+<t tx="leo.20200311103136.1">Location of openssl from https://www.msys2.org/
+
+y:\msys64\mingw64\bin\openssl.exe
+
+openssl req -x509 -nodes -days 600 -newkey rsa:2048 -keyout cd2020.key -out cd2020.crt</t>
 </tnodes>
 </leo_file>

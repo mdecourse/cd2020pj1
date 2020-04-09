@@ -12,6 +12,7 @@
 </v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
+<v t="leo.20200409150450.1"><vh>random grouping</vh></v>
 <v t="leo.20200311104947.1"><vh>use pybean.py to connect to SQLite</vh></v>
 <v t="leo.20200311104223.1"><vh>use peewee to connect to SQLite</vh></v>
 <v t="amd.20150311165615.9"><vh>@path ./</vh>
@@ -26,6 +27,8 @@
 <v t="amd.20151020233400.1"><vh>red</vh></v>
 <v t="amd.20151021000403.1"><vh>guessform</vh></v>
 <v t="amd.20151021000629.1"><vh>docheck</vh></v>
+<v t="leo.20200409151441.1"><vh>randomGrouping</vh></v>
+<v t="leo.20200409151603.1"><vh>getNumList</vh></v>
 </v>
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh></v>
@@ -44,6 +47,8 @@
 # coding: utf-8
 from flask import Flask, send_from_directory, request, redirect, render_template, session
 import random
+# for random grouping
+import requests
 
 app = Flask(__name__)
 
@@ -344,5 +349,207 @@ To delete an entire database
 
 pybean.setup()
 pybean.nuke()</t>
+<t tx="leo.20200409150450.1">@language python
+import random
+import requests
+
+# get the distributed list among each group
+def getNumList(total, eachGrp=10):
+    # total is the number of students
+    # each group at least 10 students
+    #eachGrp = 10;
+    # may divide into "grpNum" number of group
+    grpNum = total // eachGrp;
+    # check grpNum
+    #print(grpNum)
+    # vacan list
+    splits = []
+    # find remainder when total number divid into "grpNum" number of group
+    remainder = total % grpNum
+    # number of people in one group by calculation
+    calGrp = total // grpNum
+
+    for i in range(grpNum):
+        splits.append(calGrp)
+
+    # check first splits
+    #print(splits)
+
+    for i in range(remainder):
+        splits[i] += 1
+
+    # check final splits
+    #print(splits);
+    return splits;
+ 
+# url to get the student number data
+target_url = "http://mde.tw/cd2020/downloads/2020spring_cd_2a_list.txt"
+# use requests to retrieve data from url
+f = requests.get(target_url)
+# get student list from target_url
+# use splitlines() to put student number into studList
+studList = f.text.splitlines()
+# minimum number for each group
+num_in_one_group = 10
+# temp list to save the student number for each group
+gpList = []
+# whole class list
+group = []
+# number of member list for each group
+numList = []
+# get numList
+numList = getNumList(len(studList), num_in_one_group)
+# check numList
+# list numList
+print("Expected number of member list:" + str(numList))
+
+output = ""
+gth = 1
+inc = 0
+
+# use shuffle method of random module to shuffle studList
+random.shuffle(studList)
+output += "Before sort: \n"
+for i in numList:
+    # print 20 * sign
+    output += '=' * 20 + "\n";
+    output += "group " + str(gth) + " 有 " + str(i) + " 人: \n"
+    # reset group list
+    gpList = []
+    for j in range(i):
+        output += studList[j+inc] + "\n"
+        # append student number into grpList
+        gpList.append(studList[j+inc])
+
+    gth = gth + 1
+    inc = inc + j
+    # sort gpList
+    gpList.sort()
+    group.append(gpList)
+ 
+# print output which is the result before sorting
+print(output)
+# print group whis is the sorted result
+print("Sorted result:" + str(group))
+ 
+output = ""
+# output sorted result
+output += '=' * 25 + "\n"
+output += 'Sorted result:\n'
+gth = 1
+ 
+# list sorted data seperated by \n
+for i in range(len(group)):
+    # print seperated mark
+    output += '=' * 20 + "\n"
+    output += "group" + str(gth) + "\n"
+    gpList = []
+
+    for j in range(len(group[i])):
+        output += str(group[i][j]) + "\n"
+
+    gth = gth + 1
+
+print(output)</t>
+<t tx="leo.20200409151441.1">@app.route("/randomgrouping")
+def randomGrouping():
+    # url to get the student number data
+    target_url = "http://mde.tw/cd2020/downloads/2020spring_cd_2a_list.txt"
+    # use requests to retrieve data from url
+    f = requests.get(target_url)
+    # get student list from target_url
+    # use splitlines() to put student number into studList
+    studList = f.text.splitlines()
+    # minimum number for each group
+    num_in_one_group = 10
+    # temp list to save the student number for each group
+    gpList = []
+    # whole class list
+    group = []
+    # number of member list for each group
+    numList = []
+    # get numList
+    numList = getNumList(len(studList), num_in_one_group)
+    # check numList
+    # list numList
+    #print("Expected number of member list:" + str(numList))
+    
+    output = ""
+    gth = 1
+    inc = 0
+    
+    # use shuffle method of random module to shuffle studList
+    random.shuffle(studList)
+    output += "Before sort: &lt;br /&gt;"
+    for i in numList:
+        # print 20 * sign
+        output += '=' * 20 + "&lt;br /&gt;";
+        output += "group " + str(gth) + " has " + str(i) + " members:&lt;br /&gt;"
+        # reset group list
+        gpList = []
+        for j in range(i):
+            output += studList[j+inc] + "&lt;br /&gt;"
+            # append student number into grpList
+            gpList.append(studList[j+inc])
+
+        gth = gth + 1
+        inc = inc + j
+        # sort gpList
+        gpList.sort()
+        group.append(gpList)
+
+    # print output which is the result before sorting
+    print(output)
+    # print group whis is the sorted result
+    print("Sorted result:" + str(group))
+
+    output = ""
+    # output sorted result
+    output += '=' * 20 + "&lt;br /&gt;"
+    output += 'Sorted result:&lt;br /&gt;'
+    gth = 1
+
+    # list sorted data seperated by \n
+    for i in range(len(group)):
+        # print seperated mark
+        output += '=' * 20 + "&lt;br /&gt;"
+        output += "group" + str(gth) + "&lt;br /&gt;"
+        gpList = []
+
+        for j in range(len(group[i])):
+            output += str(group[i][j]) + "&lt;br /&gt;"
+
+        gth = gth + 1
+
+    print(output)
+    return output</t>
+<t tx="leo.20200409151603.1"># get the distributed list among each group
+def getNumList(total, eachGrp=10):
+    # total is the number of students
+    # each group at least 10 students
+    #eachGrp = 10;
+    # may divide into "grpNum" number of group
+    grpNum = total // eachGrp;
+    # check grpNum
+    #print(grpNum)
+    # vacan list
+    splits = []
+    # find remainder when total number divid into "grpNum" number of group
+    remainder = total % grpNum
+    # number of people in one group by calculation
+    calGrp = total // grpNum
+
+    for i in range(grpNum):
+        splits.append(calGrp)
+
+    # check first splits
+    #print(splits)
+
+    for i in range(remainder):
+        splits[i] += 1
+
+    # check final splits
+    #print(splits);
+    return splits;</t>
 </tnodes>
 </leo_file>

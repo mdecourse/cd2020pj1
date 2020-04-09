@@ -1,12 +1,12 @@
-<!-- # https://mde.tw/cd2020 協同設計專案 -->
-{# 需要從 render_template 呼叫中取得 guess, count 與 answer 變數值 #}
-猜的數字為: {{ guess }}
+<!-- # https://mde.tw/cd2020pj1 -->
+{# need to get the guess, count and answer value from render_template #}
+Your guess number is: {{ guess }}
 <br />
-已經猜了幾次: {{ count }}
+Guess count: {{ count }}
 <br />
-正確答案: {{ answer }}
+Correct answer: {{ answer }}
 <br />
 <form method="POST" action="/docheck">
-請輸入您所猜的整數:<input type="text" name="guess"><br />
+Please input your guess number:<input type="text" name="guess"><br />
 <input type="submit" value="send">
 </form>

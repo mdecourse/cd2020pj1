@@ -1,10 +1,10 @@
-<!-- # https://mde.tw/cd2020 協同設計專案 -->
-正確答案為: {{ answer }}
+<!-- # https://mde.tw/cd2020pj1 -->
+correct answer is: {{ answer }}
 <br />
-次數: {{ count }}
+count: {{ count }}
 <br />
-{# 一旦使用者送出表單, 就交由 /docheck 處理後續表單內容處理, 並且導向條件判斷迴圈, 並回覆結果 #}
+{# when user submit the form, the data will hand to /docheck and return the result #}
 <form method="POST" action="/docheck">
-請輸入您所猜的整數:<input type="text" name="guess"><br />
+Please input your guess number:<input type="text" name="guess"><br />
 <input type="submit" value="send">
 </form>

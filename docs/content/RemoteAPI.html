@@ -154,8 +154,107 @@ img.add_border {
           </div>
           
         </header>
-    <div id="tipue_search_content">Python << <a href='Python.html'>Previous</a> <a href='Flask.html'>Next</a> >> Flask<br /><h1>Dart</h1>
-<br />Python << <a href='Python.html'>Previous</a> <a href='Flask.html'>Next</a> >> Flask</div>
+    <div id="tipue_search_content">CoppeliaSim << <a href='CoppeliaSim.html'>Previous</a> <a href='Webots.html'>Next</a> >> Webots<br /><h1>RemoteAPI</h1>
+<p>Download <a href="https://drive.google.com/open?id=1uTCnYdN6PrUIGSSsjynNIT591EXvVUJA">web_vrep2.zip</a> (for @gm users only)</p>
+<p>Download <a href="https://drive.google.com/open?id=1KlnsgBFyp6OpCC_BlYH-jKL4uJixpoBl">CoppeliaSim_4_Self_Driving_Car_Simulation.7z</a> (for @gm users only)</p>
+<p>reading and display vision sensor image using python remoate api (<a href="http://www.forum.coppeliarobotics.com/viewtopic.php?f=9&amp;t=7012#p27785">來源</a>)</p>
+<p>改為 Python 3 相容</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"># -*- coding: utf-8 -*-
+"""
+Created on Sun Jul 05 15:01:58 2015
+
+@author: ACSECKIN
+
+python -m pip install opencv-python
+"""
+
+import vrep
+import time
+import cv2
+import numpy as np
+
+vrep.simxFinish(-1)
+
+clientID = vrep.simxStart('127.0.0.1', 19997, True, True, 5000, 5)
+
+if clientID!=-1:
+    print('Connected to remote API server')
+    print('Vision Sensor object handling')
+    res, v1 = vrep.simxGetObjectHandle(clientID, 'vs1', vrep.simx_opmode_oneshot_wait)
+    print('Getting first image')
+    err, resolution, image = vrep.simxGetVisionSensorImage(clientID, v1, 0, vrep.simx_opmode_streaming)
+    while (vrep.simxGetConnectionId(clientID) != -1):
+        err, resolution, image = vrep.simxGetVisionSensorImage(clientID, v1, 0, vrep.simx_opmode_buffer)
+        if err == vrep.simx_return_ok:
+            print("image OK!!!")
+            img = np.array(image,dtype=np.uint8)
+            img.resize([resolution[1],resolution[0],3])
+            cv2.imshow('image',img)
+            if cv2.waitKey(1) &amp; 0xFF == ord('q'):
+                break
+        elif err == vrep.simx_return_novalue_flag:
+            print("no image yet")
+            pass
+        else:
+          print(err)
+else:
+  print("Failed to connect to remote API Server")
+  vrep.simxFinish(clientID)
+
+cv2.destroyAllWindows()</pre>
+<p><a href="./../downloads/pythonBubbleRob.pdf">pythonBubbleRob.pdf</a></p>
+<p><a href="./../downloads/lua_one_link_remote_api.7z">lua_one_link_remote_api.7z</a></p>
+<p>V-rep 系統目錄中的 remoteApiConnections.txt 可以同時啟動多個 port 允許多 client 連線:</p>
+<pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false">// This file defines all the continuous remote API server services (started at remote API plugin initialization, i.e. V-REP start-up)
+//
+// Each remote API server service requires following 3 entries:
+//
+// portIndex@_port = xxxx               // where xxxx is the desired port number (below 19997 are preferred for server services starting at V-REP start-up)
+// portIndex@_debug = xxxx              // where xxxx is true or false
+// portIndex@_syncSimTrigger = xxxx     // where xxxx is true or false. When true, then the service will be pre-enabled for synchronous operation.
+//
+// In above strings, @ can be any number starting with 1. If more than one server service is required, then numbers need to be consecutive and starting with 1
+
+// Let's start a continuous remote API server service on port 19997:
+portIndex1_port             = 19997
+portIndex1_debug            = false
+portIndex1_syncSimTrigger   = true
+
+portIndex2_port             = 19998
+portIndex2_debug            = false
+portIndex2_syncSimTrigger   = true
+</pre>
+<p>在遠端的多台電腦, 可以利用</p>
+<p>clientID = vrep.simxStart('Server_IP', 19997, True, True, 5000, 5)</p>
+<p>與</p>
+<p><span>clientID = vrep.simxStart('Server_IP', 19998, True, True, 5000, 5)</span></p>
+<p><span>同時對 rempte API server 進行操控, 各 client 並可以透過上述程式取得 rempte API Server 運作時的影像, 以便利用各 client 中的 python 程式對遠端 V-rep 模擬進行遠端操控.</span></p>
+<p><span>例如: 兩名使用者分別在不同電腦上對同一台 rempte API Server 中的不同四輪車模型進行操控.</span></p>
+<p><span>以下為另外一個參考程式:</span></p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">import vrep
+
+print('Program started')
+vrep.simxFinish(-1) # just in case, close all opened connections
+clientID=vrep.simxStart('127.0.0.1',19999,True,True,5000,5)
+if clientID!=-1:
+    print('Connected to remote API server')
+    res,v0=vrep.simxGetObjectHandle(clientID,'Vision_sensor',vrep.simx_opmode_oneshot_wait)
+    res,v1=vrep.simxGetObjectHandle(clientID,'PassiveVision_sensor',vrep.simx_opmode_oneshot_wait)
+
+    res,resolution,image=vrep.simxGetVisionSensorImage(clientID,v0,0,vrep.simx_opmode_streaming)
+    while (vrep.simxGetConnectionId(clientID)!=-1):
+        res,resolution,image=vrep.simxGetVisionSensorImage(clientID,v0,0,vrep.simx_opmode_buffer)
+        if res==vrep.simx_return_ok:
+            res=vrep.simxSetVisionSensorImage(clientID,v1,image,0,vrep.simx_opmode_oneshot)
+    vrep.simxFinish(clientID)
+else:
+    print('Failed connecting to remote API server')
+print('Program ended')</pre>
+<p>此外 system 目錄下的 usrset.txt 可以進行客製化設定</p>
+<h4>參考資料</h4>
+<p style="padding-left: 30px;"><a href="./../downloads/Virtual Experiments Design for Robotics Based on V-REP.pdf">Virtual Experiments Design for Robotics Based on V-REP.pdf</a></p>
+<p style="padding-left: 30px;"><a href="https://arxiv.org/pdf/1906.11176.pdf">Pyrep: bringing V-rep to deep robot learning.pdf</a></p>
+<p style="padding-left: 30px;"><a href="http://fid.cl/courses/ai-robotics/vrep-tut/pythonBubbleRob.pdf">Controlling your robot with Python.pdf</a></p><br />CoppeliaSim << <a href='CoppeliaSim.html'>Previous</a> <a href='Webots.html'>Next</a> >> Webots</div>
         
     <!-- footer -->
       <div class="container">

@@ -1,9 +1,20 @@
 # https://mde.tw/cd2020 協同設計專案
 # coding: utf-8
-from flask import Flask, send_from_directory, request, redirect, render_template, session
+from flask import Flask, send_from_directory, request, redirect, \
+                render_template, session, make_response, \
+                url_for, abort, flash, g, jsonify
 import random
 # for random grouping
 import requests
+# for authomatic
+from authomatic.adapters import WerkzeugAdapter
+from authomatic import Authomatic
+
+# from config.py 導入 CONFIG
+from config import CONFIG
+
+# Instantiate Authomatic.
+authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
 app = Flask(__name__)
 
@@ -25,8 +36,9 @@ def index():
     # Store the answer and the number of calculation variables in the session
     session['answer'] = theanswer
     session['count'] = thecount
+    loginEmail = session.get('loginEmail')
 
-    return render_template("index.html", answer=theanswer, count=thecount)
+    return render_template("index.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
 
 
 @app.route('/user/<name>')
@@ -182,6 +194,35 @@ def getNumList(total, eachGrp=10):
     # check final splits
     #print(splits);
     return splits;
+@app.route('/autho_index')
+def autho_index():
+    
+    return render_template('autho_index.html')
+@app.route('/autho_login/<provider_name>/', methods=['GET', 'POST'])
+def autho_login(provider_name):
+    
+    # We need response object for the WerkzeugAdapter.
+    response = make_response()
+    
+    # Log the user in, pass it the adapter and the provider name.
+    result = authomatic.login(WerkzeugAdapter(request, response), provider_name)
+    
+    # If there is no LoginResult object, the login procedure is still pending.
+    if result:
+        if result.user:
+            # We need to update the user to get more info.
+            result.user.update()
+        
+        # use session to save login user's email (試著將 @ 換為 _at_)
+        session['loginEmail'] = result.user.email.replace('@', '_at_')
+        
+        CALLBACK_URL = "https://localhost:8443/autho_login"
+    
+        # The rest happens inside the template.
+        return render_template('autho_login.html', result=result, CALLBACK_URL=CALLBACK_URL)
+    
+    # Don't forget to return the response.
+    return response
 
 if __name__ == "__main__":
     app.run()

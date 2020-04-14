@@ -6,11 +6,17 @@
 <preferences/>
 <find_panel_settings/>
 <vnodes>
+<v t="yen.20200414103032.1"><vh>For Mac users</vh></v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="yen.20200414102935.1"><vh>oauth2 使用 authomatic</vh>
 <v t="yen.20200414102935.2"><vh>google 設定</vh></v>
 <v t="yen.20200414102935.3"><vh>啟用步驟</vh></v>
 </v>
+<v t="yen.20200414104044.1"><vh>oauth2 for @gm user</vh>
+<v t="yen.20200414150039.1"><vh>read client id and secret from file</vh></v>
+<v t="yen.20200414151417.1"><vh>generate secret id for Flask</vh></v>
+</v>
+<v t="yen.20200414142052.1"><vh>Google logout and redirect</vh></v>
 <v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
 <v t="leo.20200409150450.1"><vh>random grouping</vh></v>
 <v t="leo.20200311104947.1"><vh>use pybean.py to connect to SQLite</vh></v>
@@ -19,6 +25,7 @@
 <v t="amd.20151020231829.1"><vh>@edit .gitignore</vh></v>
 <v t="leo.20200311090825.1"><vh>@edit README.md</vh></v>
 <v t="amd.20150311165615.30"><vh>@edit wsgi.py</vh></v>
+<v t="yen.20200414112225.1"><vh>@edit config.py</vh></v>
 <v t="amd.20150311165615.31"><vh>@clean myflaskapp.py</vh>
 <v t="amd.20151020232112.1"><vh>send_static</vh></v>
 <v t="amd.20151020232140.1"><vh>index</vh></v>
@@ -29,6 +36,8 @@
 <v t="amd.20151021000629.1"><vh>docheck</vh></v>
 <v t="leo.20200409151441.1"><vh>randomGrouping</vh></v>
 <v t="leo.20200409151603.1"><vh>getNumList</vh></v>
+<v t="yen.20200414111904.1"><vh>autho_index</vh></v>
+<v t="yen.20200414111938.1"><vh>autho_login</vh></v>
 </v>
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh></v>
@@ -39,16 +48,30 @@
 <v t="amd.20151021000748.1"><vh>@edit docheck.html</vh></v>
 <v t="amd.20151021083709.1"><vh>@edit toobig.html</vh></v>
 <v t="amd.20151021083719.1"><vh>@edit toosmall.html</vh></v>
+<v t="yen.20200414111626.1"><vh>@edit autho_login.html</vh></v>
+<v t="yen.20200414111705.1"><vh>@edit autho_index.html</vh></v>
+<v t="yen.20200414111741.1"><vh>@edit autho_base.html</vh></v>
 </v>
 </vnodes>
 <tnodes>
 <t tx="amd.20150311165615.31">@language python
 # https://mde.tw/cd2020 協同設計專案
 # coding: utf-8
-from flask import Flask, send_from_directory, request, redirect, render_template, session
+from flask import Flask, send_from_directory, request, redirect, \
+                render_template, session, make_response, \
+                url_for, abort, flash, g, jsonify
 import random
 # for random grouping
 import requests
+# for authomatic
+from authomatic.adapters import WerkzeugAdapter
+from authomatic import Authomatic
+
+# from config.py 導入 CONFIG
+from config import CONFIG
+
+# Instantiate Authomatic.
+authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
 app = Flask(__name__)
 
@@ -81,8 +104,9 @@ def index():
     # Store the answer and the number of calculation variables in the session
     session['answer'] = theanswer
     session['count'] = thecount
+    loginEmail = session.get('loginEmail')
 
-    return render_template("index.html", answer=theanswer, count=thecount)
+    return render_template("index.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
 
 
 </t>
@@ -590,8 +614,8 @@ from authomatic.providers import oauth2
 CONFIG = {
         'google': {
             'class_': oauth2.Google,
-            'consumer_key': '864853543778-vfdhe8hvr6ltb1bjisvmjmfr9372arai.apps.googleusercontent.com',
-            'consumer_secret': 'VSgv_v6kmtJHDPLUAJ5POhEi',
+            'consumer_key': '#######',
+            'consumer_secret': '#######',
             'scope': oauth2.Google.user_info_scope
         }
     }
@@ -620,5 +644,107 @@ def autho_login(provider_name):
     
     # Don't forget to return the response.
     return response</t>
+<t tx="yen.20200414103032.1">Environment:
+
+    Leo Editor 6.2.1 final
+    Python 3.7.3
+    PyQt 5.12.3
+    Darwin
+
+Notice for Mac user:
+
+    the System Preferences -&gt; General 
+        need to set to Auto to get the correct menu theme color
+        
+    it seems only the last open .leo file can use File -&gt; Save, other previous open .leo files can only be saved while file close.
+    
+    outline copy and paste only working for mouse click not from pull-down menu</t>
+<t tx="yen.20200414104044.1">Setup URL
+
+https://console.developers.google.com
+
+First setup, the welcome popup:
+
+    Welcome, KMOLab!
+    
+    Create and manage your Google Cloud Platform instances, disks, networks and other resources in one place.
+    
+    need to agree the Terms of Service.
+    
+You have 12 projects remaining in your quota. 
+
+----
+Enable Google + Domain API
+
+Go to credentials
+
+Remember to configure the OAuth consent screen with information about your application.
+
+----
+OAuth consent screen
+
+Choose how you want to configure and register your app, including your target users. You can only associate one app with your project.
+
+User type:
+
+choose internal: only allow @gm user to login
+
+Press Create
+----
+Create OAuth client ID
+
+Application type: Web application</t>
+<t tx="yen.20200414111904.1">@app.route('/autho_index')
+def autho_index():
+    
+    return render_template('autho_index.html')
+</t>
+<t tx="yen.20200414111938.1">@app.route('/autho_login/&lt;provider_name&gt;/', methods=['GET', 'POST'])
+def autho_login(provider_name):
+    
+    # We need response object for the WerkzeugAdapter.
+    response = make_response()
+    
+    # Log the user in, pass it the adapter and the provider name.
+    result = authomatic.login(WerkzeugAdapter(request, response), provider_name)
+    
+    # If there is no LoginResult object, the login procedure is still pending.
+    if result:
+        if result.user:
+            # We need to update the user to get more info.
+            result.user.update()
+        
+        # use session to save login user's email (試著將 @ 換為 _at_)
+        session['loginEmail'] = result.user.email.replace('@', '_at_')
+        
+        CALLBACK_URL = "https://localhost:8443/autho_login"
+    
+        # The rest happens inside the template.
+        return render_template('autho_login.html', result=result, CALLBACK_URL=CALLBACK_URL)
+    
+    # Don't forget to return the response.
+    return response
+</t>
+<t tx="yen.20200414142052.1">https://stackoverflow.com/questions/4202161/google-account-logout-and-redirect
+
+https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://localhost:8443</t>
+<t tx="yen.20200414150039.1">@language python
+
+keyFile = open('./../oauth_gm.txt', 'r')
+with open('./../oauth_gm.txt', 'r') as f:
+    key = f.read().splitlines()
+g.es(key)</t>
+<t tx="yen.20200414151417.1">@language python
+# Windows use Ctrl + b to execute under Leo Editor node
+# Mac use Command +b to execute
+# app.secret_key = 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T'
+# this key is to keep the session safe
+import secrets
+
+g.es(secrets.token_urlsafe(24))
+
+# 6Xpn4BDO5b1t39dNcPH6PAWTlQaD4B8X
+# c8aDEUckVQnZ8nwkAgGSk3nvS_beJYkL
+# WFUABb_IPfxvdZgaih4Lecik4giKBtTd</t>
 </tnodes>
 </leo_file>

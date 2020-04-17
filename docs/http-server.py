@@ -14,7 +14,7 @@ def domake():
                                    keyfile='./cmsimde/localhost.key',
                                    ssl_version=ssl.PROTOCOL_TLSv1)
     print(os.getcwd())
-    print("8444 https server started")
+    print("7444 https server started")
     httpd.serve_forever()
 
 # 利用執行緒執行 https 伺服器

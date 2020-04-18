@@ -27,8 +27,8 @@ app.secret_key = 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T'
 @app.route('/static/<path:path>')
 def send_static(path):
     return send_from_directory('static', path)
-@app.route("/")
-def index():
+@app.route("/guess")
+def guess():
     # This is the starting form for guessing numbers game, mainly to generate answers, and to reset count to zero
     # Store answers of guessing
     theanswer = random.randint(1, 100)
@@ -38,7 +38,7 @@ def index():
     session['count'] = thecount
     loginEmail = session.get('loginEmail')
 
-    return render_template("index.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
+    return render_template("guess.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
 
 
 @app.route('/user/<name>')
@@ -194,10 +194,10 @@ def getNumList(total, eachGrp=10):
     # check final splits
     #print(splits);
     return splits;
-@app.route('/autho_index')
-def autho_index():
+@app.route('/')
+def index():
     
-    return render_template('autho_index.html')
+    return render_template('index.html')
 @app.route('/autho_login/<provider_name>/', methods=['GET', 'POST'])
 def autho_login(provider_name):
     

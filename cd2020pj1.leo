@@ -8,6 +8,8 @@
 <vnodes>
 <v t="yen.20200414103032.1"><vh>For Mac users</vh></v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
+<v t="yen.20200418212333.1"><vh>Status</vh></v>
+<v t="yen.20200418223522.1"><vh>flutter and flask</vh></v>
 <v t="yen.20200414102935.1"><vh>oauth2 使用 authomatic</vh>
 <v t="yen.20200414102935.2"><vh>google 設定</vh></v>
 <v t="yen.20200414102935.3"><vh>啟用步驟</vh></v>
@@ -18,7 +20,9 @@
 </v>
 <v t="yen.20200414142052.1"><vh>Google logout and redirect</vh></v>
 <v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
-<v t="leo.20200409150450.1"><vh>random grouping</vh></v>
+<v t="leo.20200409150450.1"><vh>random grouping</vh>
+<v t="yen.20200418212208.1"><vh>Save grouping result into database</vh></v>
+</v>
 <v t="leo.20200311104947.1"><vh>use pybean.py to connect to SQLite</vh></v>
 <v t="leo.20200311104223.1"><vh>use peewee to connect to SQLite</vh></v>
 <v t="amd.20150311165615.9"><vh>@path ./</vh>
@@ -28,7 +32,7 @@
 <v t="yen.20200414112225.1"><vh>@edit config.py</vh></v>
 <v t="amd.20150311165615.31"><vh>@clean myflaskapp.py</vh>
 <v t="amd.20151020232112.1"><vh>send_static</vh></v>
-<v t="amd.20151020232140.1"><vh>index</vh></v>
+<v t="amd.20151020232140.1"><vh>guess</vh></v>
 <v t="amd.20151020232703.1"><vh>user</vh></v>
 <v t="amd.20151020232845.1"><vh>req1</vh></v>
 <v t="amd.20151020233400.1"><vh>red</vh></v>
@@ -36,20 +40,20 @@
 <v t="amd.20151021000629.1"><vh>docheck</vh></v>
 <v t="leo.20200409151441.1"><vh>randomGrouping</vh></v>
 <v t="leo.20200409151603.1"><vh>getNumList</vh></v>
-<v t="yen.20200414111904.1"><vh>autho_index</vh></v>
+<v t="yen.20200414111904.1"><vh>index</vh></v>
 <v t="yen.20200414111938.1"><vh>autho_login</vh></v>
 </v>
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh></v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
-<v t="amd.20151020234049.1"><vh>@edit index.html</vh></v>
+<v t="amd.20151020234049.1"><vh>@edit guess.html</vh></v>
 <v t="amd.20151020234120.1"><vh>@edit user.html</vh></v>
 <v t="amd.20151021000500.1"><vh>@edit guessform.html</vh></v>
 <v t="amd.20151021000748.1"><vh>@edit docheck.html</vh></v>
 <v t="amd.20151021083709.1"><vh>@edit toobig.html</vh></v>
 <v t="amd.20151021083719.1"><vh>@edit toosmall.html</vh></v>
 <v t="yen.20200414111626.1"><vh>@edit autho_login.html</vh></v>
-<v t="yen.20200414111705.1"><vh>@edit autho_index.html</vh></v>
+<v t="yen.20200414111705.1"><vh>@edit index.html</vh></v>
 <v t="yen.20200414111741.1"><vh>@edit autho_base.html</vh></v>
 </v>
 </vnodes>
@@ -95,8 +99,8 @@ Stared on March 11, 2020
 @app.route('/static/&lt;path:path&gt;')
 def send_static(path):
     return send_from_directory('static', path)</t>
-<t tx="amd.20151020232140.1">@app.route("/")
-def index():
+<t tx="amd.20151020232140.1">@app.route("/guess")
+def guess():
     # This is the starting form for guessing numbers game, mainly to generate answers, and to reset count to zero
     # Store answers of guessing
     theanswer = random.randint(1, 100)
@@ -106,7 +110,7 @@ def index():
     session['count'] = thecount
     loginEmail = session.get('loginEmail')
 
-    return render_template("index.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
+    return render_template("guess.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
 
 
 </t>
@@ -694,10 +698,10 @@ Press Create
 Create OAuth client ID
 
 Application type: Web application</t>
-<t tx="yen.20200414111904.1">@app.route('/autho_index')
-def autho_index():
+<t tx="yen.20200414111904.1">@app.route('/')
+def index():
     
-    return render_template('autho_index.html')
+    return render_template('index.html')
 </t>
 <t tx="yen.20200414111938.1">@app.route('/autho_login/&lt;provider_name&gt;/', methods=['GET', 'POST'])
 def autho_login(provider_name):
@@ -727,7 +731,9 @@ def autho_login(provider_name):
 </t>
 <t tx="yen.20200414142052.1">https://stackoverflow.com/questions/4202161/google-account-logout-and-redirect
 
-https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://localhost:8443</t>
+https://www.google.com/accounts/Logout?continue=https://appengine.google.com/_ah/logout?continue=https://localhost:8443/guess
+
+When user login with Gmail account, user email is saved into session and logout from Gmail by using javascript and redirect to https://localhost:8443/guess</t>
 <t tx="yen.20200414150039.1">@language python
 
 keyFile = open('./../oauth_gm.txt', 'r')
@@ -746,5 +752,17 @@ g.es(secrets.token_urlsafe(24))
 # 6Xpn4BDO5b1t39dNcPH6PAWTlQaD4B8X
 # c8aDEUckVQnZ8nwkAgGSk3nvS_beJYkL
 # WFUABb_IPfxvdZgaih4Lecik4giKBtTd</t>
+<t tx="yen.20200418212208.1"></t>
+<t tx="yen.20200418212333.1">1. oauth2 to login with Gmail account
+after system got user email, use session to save user email account and logout from Gmail right away.
+
+and then redirect to guess method
+
+2. need to save the /randomgrouping result into SQLite database
+
+3. socketio?
+
+http://mde.tw/cp2019/content/Flutter%20Mobile.html</t>
+<t tx="yen.20200418223522.1">https://medium.com/@pyzimos/flutter-chatbot-with-python-flask-backend-heroku-deployment-706baafbb8f1</t>
 </tnodes>
 </leo_file>

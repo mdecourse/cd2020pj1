@@ -1,11 +1,8 @@
-<!-- # https://mde.tw/cd2020pj1 -->
-login_email: {{ loginEmail }} <br />
-correct answer is: {{ answer }}
-<br />
-count: {{ count }}
-<br />
-{# when user submit the form, the data will hand to /docheck and return the result #}
-<form method="POST" action="/docheck">
-Please input your guess number:<input type="text" name="guess"><br />
-<input type="submit" value="send">
-</form>
+{# index.html #}
+{% extends "autho_base.html" %}
+{% block body %}
+
+    <!--Links to the login handler-->
+    Login with <a href="autho_login/google">google</a>.<br />
+
+{% endblock %}

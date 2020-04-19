@@ -11,8 +11,10 @@
 <v t="yen.20200418212333.1"><vh>Status</vh></v>
 <v t="yen.20200419213322.1"><vh>@edit .gitignore</vh></v>
 <v t="yen.20200418223522.1"><vh>flutter and flask</vh>
+<v t="yen.20200419224718.1"><vh>develop .js from .dart</vh></v>
 <v t="yen.20200419212418.1"><vh>@path static</vh>
 <v t="yen.20200419212511.1"><vh>@button drawROCtojs</vh></v>
+<v t="yen.20200419230015.1"><vh>@button copy js to docs/downloads</vh></v>
 <v t="yen.20200419211033.1"><vh>dart2js</vh>
 <v t="yen.20200419211912.1"><vh>@edit drawROC.dart</vh></v>
 <v t="yen.20200419211955.1"><vh>html for drawROC</vh></v>
@@ -823,7 +825,7 @@ source ./bash_profile</t>
 <t tx="yen.20200419211955.1">@language html
 
 &lt;div id="wrapper"&gt;
-  &lt;canvas id="canvas" width="300" height="200"&gt;&lt;/canvas&gt;
+  &lt;canvas id="canvas" width="300" height="200"&gt;&lt;/canvas&gt;&lt;br /&gt;
   &lt;button id="button"&gt;Clear Canvas&lt;/button&gt;
   &lt;button id="roc"&gt;Draw ROC&lt;/button&gt;
   &lt;button id="usa"&gt;Draw USA&lt;/button&gt;
@@ -847,6 +849,9 @@ static/drawROC.js
 '''
 import os
 
+# https://dart.dev/tools/dart2js#basic-options
+# -02 is for dart2js optimization level
+
 os.system("/Users/yen/development/flutter/bin/cache/dart-sdk/bin/dart2js -02 -o drawROC.js drawROC.dart")
 # echo string
 '''
@@ -860,5 +865,18 @@ g.es("drawROC.js created")</t>
 def drawROC():
     return render_template("drawROC.html")
     </t>
+<t tx="yen.20200419224718.1">Here we use Flask to send variables through GET or POST to integrated with Dart programs.</t>
+<t tx="yen.20200419230015.1">@language python
+import os
+
+os.system("cp drawROC.js ./../docs/downloads/")
+# echo string
+'''
+for Leo Editor:
+c is the commander of the outline containing the script.
+g is Leo’s leo.core.leoGlobals module.
+p is the presently selected position, the same as c.p.
+'''
+g.es("copy drawROC.js to ./../docs/downloads/")</t>
 </tnodes>
 </leo_file>

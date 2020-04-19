@@ -22,6 +22,7 @@
 </v>
 </v>
 </v>
+<v t="yen.20200419234118.1"><vh>Flask and Cango js library</vh></v>
 <v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
 <v t="yen.20200414104044.1"><vh>oauth2 for @gm user</vh>
 <v t="yen.20200414102935.1"><vh>oauth2 使用 authomatic</vh>
@@ -878,5 +879,6 @@ g is Leo’s leo.core.leoGlobals module.
 p is the presently selected position, the same as c.p.
 '''
 g.es("copy drawROC.js to ./../docs/downloads/")</t>
+<t tx="yen.20200419234118.1">https://www.arc.id.au/GearDrawing.html</t>
 </tnodes>
 </leo_file>

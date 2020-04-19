@@ -56,11 +56,6 @@ target/
 
 # for Mac
 
-# for dart2js
-*.js.deps
-*.js.map
-
-
 # General
 .DS_Store
 .AppleDouble

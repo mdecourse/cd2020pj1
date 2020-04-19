@@ -23,6 +23,14 @@ app = Flask(__name__)
 # set the secret key.  keep this really secret:
 app.secret_key = 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T'
 
+def __init__():
+    # create required directory
+    # create SQLite database file if not existed
+    g.es("do nothing")
+@app.route('/drawROC')
+def drawROC():
+    return render_template("drawROC.html")
+    
 # setup static directory
 @app.route('/static/<path:path>')
 def send_static(path):

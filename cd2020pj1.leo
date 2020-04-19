@@ -9,28 +9,45 @@
 <v t="yen.20200414103032.1"><vh>For Mac users</vh></v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="yen.20200418212333.1"><vh>Status</vh></v>
-<v t="yen.20200418223522.1"><vh>flutter and flask</vh></v>
+<v t="yen.20200419213322.1"><vh>@edit .gitignore</vh></v>
+<v t="yen.20200418223522.1"><vh>flutter and flask</vh>
+<v t="yen.20200419212418.1"><vh>@path static</vh>
+<v t="yen.20200419212511.1"><vh>@button drawROCtojs</vh></v>
+<v t="yen.20200419211033.1"><vh>dart2js</vh>
+<v t="yen.20200419211912.1"><vh>@edit drawROC.dart</vh></v>
+<v t="yen.20200419211955.1"><vh>html for drawROC</vh></v>
+<v t="yen.20200419212331.1"><vh>css for drawROC</vh></v>
+</v>
+</v>
+</v>
+<v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
+<v t="yen.20200414104044.1"><vh>oauth2 for @gm user</vh>
 <v t="yen.20200414102935.1"><vh>oauth2 使用 authomatic</vh>
 <v t="yen.20200414102935.2"><vh>google 設定</vh></v>
 <v t="yen.20200414102935.3"><vh>啟用步驟</vh></v>
 </v>
-<v t="yen.20200414104044.1"><vh>oauth2 for @gm user</vh>
 <v t="yen.20200414150039.1"><vh>read client id and secret from file</vh></v>
 <v t="yen.20200414151417.1"><vh>generate secret id for Flask</vh></v>
-</v>
 <v t="yen.20200414142052.1"><vh>Google logout and redirect</vh></v>
-<v t="leo.20200311103136.1"><vh>generate self-signed certificate</vh></v>
+</v>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
 <v t="yen.20200418212208.1"><vh>Save grouping result into database</vh></v>
 </v>
+<v t="yen.20200419155906.1"><vh>Database</vh>
+<v t="yen.20200419155956.1"><vh>@edit schema.sql</vh></v>
+<v t="yen.20200419160014.1"><vh>@button create db</vh></v>
 <v t="leo.20200311104947.1"><vh>use pybean.py to connect to SQLite</vh></v>
+<v t="yen.20200419201709.1"><vh>use sqlite3 to save data to SQLite</vh></v>
 <v t="leo.20200311104223.1"><vh>use peewee to connect to SQLite</vh></v>
+</v>
 <v t="amd.20150311165615.9"><vh>@path ./</vh>
 <v t="amd.20151020231829.1"><vh>@edit .gitignore</vh></v>
 <v t="leo.20200311090825.1"><vh>@edit README.md</vh></v>
 <v t="amd.20150311165615.30"><vh>@edit wsgi.py</vh></v>
 <v t="yen.20200414112225.1"><vh>@edit config.py</vh></v>
 <v t="amd.20150311165615.31"><vh>@clean myflaskapp.py</vh>
+<v t="yen.20200419202547.1"><vh>__init__</vh></v>
+<v t="yen.20200419213555.1"><vh>drawROC</vh></v>
 <v t="amd.20151020232112.1"><vh>send_static</vh></v>
 <v t="amd.20151020232140.1"><vh>guess</vh></v>
 <v t="amd.20151020232703.1"><vh>user</vh></v>
@@ -46,6 +63,7 @@
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh></v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
+<v t="yen.20200419213847.1"><vh>@edit drawROC.html</vh></v>
 <v t="amd.20151020234049.1"><vh>@edit guess.html</vh></v>
 <v t="amd.20151020234120.1"><vh>@edit user.html</vh></v>
 <v t="amd.20151021000500.1"><vh>@edit guessform.html</vh></v>
@@ -764,5 +782,83 @@ and then redirect to guess method
 
 http://mde.tw/cp2019/content/Flutter%20Mobile.html</t>
 <t tx="yen.20200418223522.1">https://medium.com/@pyzimos/flutter-chatbot-with-python-flask-backend-heroku-deployment-706baafbb8f1</t>
+<t tx="yen.20200419155906.1"></t>
+<t tx="yen.20200419160014.1">@language python
+'''
+local_data/db/database.db
+'''
+import os
+
+os.system("sqlite3 local_data/db/database.db &lt; schema.sql")
+# echo string
+'''
+for Leo Editor:
+c is the commander of the outline containing the script.
+g is Leo’s leo.core.leoGlobals module.
+p is the presently selected position, the same as c.p.
+'''
+g.es("database.db created")</t>
+<t tx="yen.20200419201709.1">@language python
+# sqlite3 is default for Python3
+import sqlite3
+# g is global object for Leo Editor
+# es is the "echo string" method of g object
+g.es("sqlite3")</t>
+<t tx="yen.20200419202547.1">def __init__():
+    # create required directory
+    # create SQLite database file if not existed
+    g.es("do nothing")</t>
+<t tx="yen.20200419211033.1">On Mac
+
+dart2js located at
+
+/Users/login_account/development/flutter/bin/cache/dart-sdk/bin
+
+cd
+vi .bash_profile
+
+export PATH="$PATH:/Users/login_account/development/flutter/bin/cache/dart-sdk/bin"
+
+source ./bash_profile</t>
+<t tx="yen.20200419211955.1">@language html
+
+&lt;div id="wrapper"&gt;
+  &lt;canvas id="canvas" width="300" height="200"&gt;&lt;/canvas&gt;
+  &lt;button id="button"&gt;Clear Canvas&lt;/button&gt;
+  &lt;button id="roc"&gt;Draw ROC&lt;/button&gt;
+  &lt;button id="usa"&gt;Draw USA&lt;/button&gt;
+&lt;/div&gt;</t>
+<t tx="yen.20200419212331.1">html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#wrapper {
+  width: 300px;
+  margin: auto;
+  border: solid thin black;
+}</t>
+<t tx="yen.20200419212418.1"></t>
+<t tx="yen.20200419212511.1">@language python
+'''
+static/drawROC.js
+'''
+import os
+
+os.system("/Users/yen/development/flutter/bin/cache/dart-sdk/bin/dart2js -02 -o drawROC.js drawROC.dart")
+# echo string
+'''
+for Leo Editor:
+c is the commander of the outline containing the script.
+g is Leo’s leo.core.leoGlobals module.
+p is the presently selected position, the same as c.p.
+'''
+g.es("drawROC.js created")</t>
+<t tx="yen.20200419213555.1">@app.route('/drawROC')
+def drawROC():
+    return render_template("drawROC.html")
+    </t>
 </tnodes>
 </leo_file>

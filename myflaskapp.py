@@ -91,7 +91,7 @@ def drawROC():
 @app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping"]
+    menuList = ["guess", "drawROC", "randomgrouping", "show_entries"]
     return render_template("menu.html", menuList=menuList)
 # setup static directory
 @app.route('/static/<path:path>')
@@ -267,6 +267,7 @@ def add_entry():
     g.db.commit()
     flash('已經新增一筆資料!')
     return redirect(url_for('show_entries'))
+# set default value of the variables accordingly
 @app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
 @app.route('/show_entries/<int:page>', defaults={'item_per_page': 10})
 @app.route('/show_entries/<int:page>/<int:item_per_page>')
@@ -311,7 +312,7 @@ def getNumList(total, eachGrp=10):
     #print(splits);
     return splits;
 @app.route('/')
-@login_required
+# root of the system can not set "login_required" decorator
 def index():
     return render_template('index.html')
 @app.route('/login/<provider_name>/', methods=['GET', 'POST'])
@@ -335,7 +336,7 @@ def login(provider_name):
         session["user"] = loginUser
         session["login"] = True
         
-        CALLBACK_URL = "https://localhost:8443/autho_login"
+        CALLBACK_URL = "https://localhost:8443/menu"
     
         # The rest happens inside the template.
         return render_template('login.html', result=result, CALLBACK_URL=CALLBACK_URL)

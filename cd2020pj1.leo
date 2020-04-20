@@ -767,7 +767,7 @@ Create OAuth client ID
 
 Application type: Web application</t>
 <t tx="yen.20200414111904.1">@app.route('/')
-@login_required
+# root of the system can not set "login_required" decorator
 def index():
     return render_template('index.html')
 </t>
@@ -792,7 +792,7 @@ def login(provider_name):
         session["user"] = loginUser
         session["login"] = True
         
-        CALLBACK_URL = "https://localhost:8443/autho_login"
+        CALLBACK_URL = "https://localhost:8443/menu"
     
         # The rest happens inside the template.
         return render_template('login.html', result=result, CALLBACK_URL=CALLBACK_URL)
@@ -978,9 +978,10 @@ def logout():
 <t tx="yen.20200420144030.1">@app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping"]
+    menuList = ["guess", "drawROC", "randomgrouping", "show_entries"]
     return render_template("menu.html", menuList=menuList)</t>
-<t tx="yen.20200420153541.1">@app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
+<t tx="yen.20200420153541.1"># set default value of the variables accordingly
+@app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
 @app.route('/show_entries/&lt;int:page&gt;', defaults={'item_per_page': 10})
 @app.route('/show_entries/&lt;int:page&gt;/&lt;int:item_per_page&gt;')
 @login_required

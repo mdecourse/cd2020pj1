@@ -15,9 +15,18 @@ from config import CONFIG
 
 # for _curdir
 import os
+# calculate pagenating
+import math
 
 # for login_required decorator
 from functools import wraps
+
+# for sqlite3 資料庫
+import sqlite3
+from contextlib import closing
+
+# for add_entry
+import datetime
 
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
@@ -41,7 +50,8 @@ def __init__():
             print("db mkdir error")
     # create SQLite database file if not existed
     try:
-        conn = sqlite3.connect(_curdir+"db/database.db")
+        # need to check if this work with Windows
+        conn = sqlite3.connect(_curdir+"/db/database.db")
         cur = conn.cursor()
         # create table
         cur.execute("CREATE TABLE IF NOT EXISTS grouping( \
@@ -58,7 +68,11 @@ def __init__():
         with app.open_resource('schema.sql' , mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
-    g.es("do nothing")
+    print("do nothing")
+@app.before_request
+def before_request():
+    # need to check if this works with Windows
+    g.db = sqlite3.connect(_curdir+"/db/database.db")
 def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -122,6 +136,7 @@ def guessform():
     count = session.get("count")
     return render_template("guessform.html", guess=guess, answer=theanswer, count=count)
 @app.route('/docheck', methods=['POST'])
+@login_required
 def docheck():
     if not session.get('login'):
         return redirect(url_for('index'))
@@ -230,7 +245,43 @@ def randomGrouping():
         gth = gth + 1
 
     print(output)
+    
+    # add grouping result into grouping table of /db/database.db
+    date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
+    user = session.get("user")
+    result = str(group)
+    # 希望新增重複資料查驗功能
+    g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',
+            (user, date, result, "memo"))
+    g.db.commit()
+    flash('已經新增一筆資料!')
     return output
+@app.route('/add_entry',methods=['POST'])
+@login_required
+def add_entry():
+    date = datetime.datetime.now()
+    # 希望新增重複資料查驗功能
+    g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',
+            (request.form['user'], date, request.form['result'], \
+            request.form['memo']))
+    g.db.commit()
+    flash('已經新增一筆資料!')
+    return redirect(url_for('show_entries'))
+@app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
+@app.route('/show_entries/<int:page>', defaults={'item_per_page': 10})
+@app.route('/show_entries/<int:page>/<int:item_per_page>')
+@login_required
+# 內定每頁顯示 10 筆資料, 從第1頁開始
+def show_entries(page, item_per_page):
+    # 先取得資料總筆數
+    cur = g.db.execute('select * from grouping;')
+    total_number = len(cur.fetchall())
+    query_string = 'select id, user , date, result, memo from grouping order by id desc limit '+str(item_per_page)+' offset '+str((page-1)*item_per_page)
+    cur = g.db.execute(query_string)
+    grouping = [dict(id=row[0], user=row[1], date=row[2], result=row[3], memo=row[4]) for row in cur.fetchall()]
+    totalpage = math.ceil(total_number/int(item_per_page))
+    return render_template('show_entries.html' , grouping = grouping, total_number=total_number, \
+                    page=page, item_per_page=item_per_page, totalpage=totalpage)
 # get the distributed list among each group
 def getNumList(total, eachGrp=10):
     # total is the number of students

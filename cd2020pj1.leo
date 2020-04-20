@@ -50,6 +50,7 @@
 <v t="yen.20200414112225.1"><vh>@edit config.py</vh></v>
 <v t="amd.20150311165615.31"><vh>@clean myflaskapp.py</vh>
 <v t="yen.20200419202547.1"><vh>__init__</vh></v>
+<v t="yen.20200420162350.1"><vh>before_request</vh></v>
 <v t="yen.20200420141224.1"><vh>login_required</vh></v>
 <v t="yen.20200419213555.1"><vh>drawROC</vh></v>
 <v t="yen.20200420144030.1"><vh>menu</vh></v>
@@ -61,6 +62,8 @@
 <v t="amd.20151021000403.1"><vh>guessform</vh></v>
 <v t="amd.20151021000629.1"><vh>docheck</vh></v>
 <v t="leo.20200409151441.1"><vh>randomGrouping</vh></v>
+<v t="yen.20200420153612.1"><vh>add_entry</vh></v>
+<v t="yen.20200420153541.1"><vh>show_entries</vh></v>
 <v t="leo.20200409151603.1"><vh>getNumList</vh></v>
 <v t="yen.20200414111904.1"><vh>index</vh></v>
 <v t="yen.20200414111938.1"><vh>login</vh></v>
@@ -70,6 +73,8 @@
 <v t="amd.20151020232503.1"><vh>@path static</vh></v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
 <v t="yen.20200419213847.1"><vh>@edit drawROC.html</vh></v>
+<v t="yen.20200420154412.1"><vh>@edit show_entries.html</vh></v>
+<v t="yen.20200420154310.1"><vh>@edit layout.html</vh></v>
 <v t="amd.20151020234049.1"><vh>@edit guess.html</vh></v>
 <v t="amd.20151020234120.1"><vh>@edit user.html</vh></v>
 <v t="amd.20151021000500.1"><vh>@edit guessform.html</vh></v>
@@ -101,9 +106,18 @@ from config import CONFIG
 
 # for _curdir
 import os
+# calculate pagenating
+import math
 
 # for login_required decorator
 from functools import wraps
+
+# for sqlite3 資料庫
+import sqlite3
+from contextlib import closing
+
+# for add_entry
+import datetime
 
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
@@ -175,6 +189,7 @@ def guessform():
     count = session.get("count")
     return render_template("guessform.html", guess=guess, answer=theanswer, count=count)</t>
 <t tx="amd.20151021000629.1">@app.route('/docheck', methods=['POST'])
+@login_required
 def docheck():
     if not session.get('login'):
         return redirect(url_for('index'))
@@ -499,6 +514,16 @@ def randomGrouping():
         gth = gth + 1
 
     print(output)
+    
+    # add grouping result into grouping table of /db/database.db
+    date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
+    user = session.get("user")
+    result = str(group)
+    # 希望新增重複資料查驗功能
+    g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',
+            (user, date, result, "memo"))
+    g.db.commit()
+    flash('已經新增一筆資料!')
     return output</t>
 <t tx="leo.20200409151603.1"># get the distributed list among each group
 def getNumList(total, eachGrp=10):
@@ -831,7 +856,9 @@ g.es("database.db created")</t>
 import sqlite3
 # g is global object for Leo Editor
 # es is the "echo string" method of g object
-g.es("sqlite3")</t>
+g.es("sqlite3")
+
+# https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/</t>
 <t tx="yen.20200419202547.1">def __init__():
     # create required directory
     if not os.path.isdir(_curdir+"db"):
@@ -841,7 +868,8 @@ g.es("sqlite3")</t>
             print("db mkdir error")
     # create SQLite database file if not existed
     try:
-        conn = sqlite3.connect(_curdir+"db/database.db")
+        # need to check if this work with Windows
+        conn = sqlite3.connect(_curdir+"/db/database.db")
         cur = conn.cursor()
         # create table
         cur.execute("CREATE TABLE IF NOT EXISTS grouping( \
@@ -858,7 +886,7 @@ g.es("sqlite3")</t>
         with app.open_resource('schema.sql' , mode='r') as f:
             db.cursor().executescript(f.read())
         db.commit()
-    g.es("do nothing")
+    print("do nothing")
 </t>
 <t tx="yen.20200419211033.1">On Mac
 
@@ -952,5 +980,37 @@ def logout():
 def menu():
     menuList = ["guess", "drawROC", "randomgrouping"]
     return render_template("menu.html", menuList=menuList)</t>
+<t tx="yen.20200420153541.1">@app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
+@app.route('/show_entries/&lt;int:page&gt;', defaults={'item_per_page': 10})
+@app.route('/show_entries/&lt;int:page&gt;/&lt;int:item_per_page&gt;')
+@login_required
+# 內定每頁顯示 10 筆資料, 從第1頁開始
+def show_entries(page, item_per_page):
+    # 先取得資料總筆數
+    cur = g.db.execute('select * from grouping;')
+    total_number = len(cur.fetchall())
+    query_string = 'select id, user , date, result, memo from grouping order by id desc limit '+str(item_per_page)+' offset '+str((page-1)*item_per_page)
+    cur = g.db.execute(query_string)
+    grouping = [dict(id=row[0], user=row[1], date=row[2], result=row[3], memo=row[4]) for row in cur.fetchall()]
+    totalpage = math.ceil(total_number/int(item_per_page))
+    return render_template('show_entries.html' , grouping = grouping, total_number=total_number, \
+                    page=page, item_per_page=item_per_page, totalpage=totalpage)
+</t>
+<t tx="yen.20200420153612.1">@app.route('/add_entry',methods=['POST'])
+@login_required
+def add_entry():
+    date = datetime.datetime.now()
+    # 希望新增重複資料查驗功能
+    g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',
+            (request.form['user'], date, request.form['result'], \
+            request.form['memo']))
+    g.db.commit()
+    flash('已經新增一筆資料!')
+    return redirect(url_for('show_entries'))
+</t>
+<t tx="yen.20200420162350.1">@app.before_request
+def before_request():
+    # need to check if this works with Windows
+    g.db = sqlite3.connect(_curdir+"/db/database.db")</t>
 </tnodes>
 </leo_file>

@@ -50,7 +50,9 @@
 <v t="yen.20200414112225.1"><vh>@edit config.py</vh></v>
 <v t="amd.20150311165615.31"><vh>@clean myflaskapp.py</vh>
 <v t="yen.20200419202547.1"><vh>__init__</vh></v>
+<v t="yen.20200420141224.1"><vh>login_required</vh></v>
 <v t="yen.20200419213555.1"><vh>drawROC</vh></v>
+<v t="yen.20200420144030.1"><vh>menu</vh></v>
 <v t="amd.20151020232112.1"><vh>send_static</vh></v>
 <v t="amd.20151020232140.1"><vh>guess</vh></v>
 <v t="amd.20151020232703.1"><vh>user</vh></v>
@@ -61,7 +63,8 @@
 <v t="leo.20200409151441.1"><vh>randomGrouping</vh></v>
 <v t="leo.20200409151603.1"><vh>getNumList</vh></v>
 <v t="yen.20200414111904.1"><vh>index</vh></v>
-<v t="yen.20200414111938.1"><vh>autho_login</vh></v>
+<v t="yen.20200414111938.1"><vh>login</vh></v>
+<v t="yen.20200420143358.1"><vh>logout</vh></v>
 </v>
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh></v>
@@ -73,9 +76,10 @@
 <v t="amd.20151021000748.1"><vh>@edit docheck.html</vh></v>
 <v t="amd.20151021083709.1"><vh>@edit toobig.html</vh></v>
 <v t="amd.20151021083719.1"><vh>@edit toosmall.html</vh></v>
-<v t="yen.20200414111626.1"><vh>@edit autho_login.html</vh></v>
+<v t="yen.20200414111626.1"><vh>@edit login.html</vh></v>
+<v t="yen.20200420144223.1"><vh>@edit menu.html</vh></v>
 <v t="yen.20200414111705.1"><vh>@edit index.html</vh></v>
-<v t="yen.20200414111741.1"><vh>@edit autho_base.html</vh></v>
+<v t="yen.20200414111741.1"><vh>@edit base.html</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -95,8 +99,17 @@ from authomatic import Authomatic
 # from config.py 導入 CONFIG
 from config import CONFIG
 
+# for _curdir
+import os
+
+# for login_required decorator
+from functools import wraps
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
+
+# 確定程式檔案所在目錄, 在 Windows 有最後的反斜線
+_curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
 
 app = Flask(__name__)
 
@@ -121,7 +134,12 @@ Stared on March 11, 2020
 def send_static(path):
     return send_from_directory('static', path)</t>
 <t tx="amd.20151020232140.1">@app.route("/guess")
+@login_required
 def guess():
+    '''
+    if not session.get('login'):
+        return redirect(url_for('index'))
+    '''
     # This is the starting form for guessing numbers game, mainly to generate answers, and to reset count to zero
     # Store answers of guessing
     theanswer = random.randint(1, 100)
@@ -129,9 +147,9 @@ def guess():
     # Store the answer and the number of calculation variables in the session
     session['answer'] = theanswer
     session['count'] = thecount
-    loginEmail = session.get('loginEmail')
+    user = session.get('user')
 
-    return render_template("guess.html", answer=theanswer, count=thecount, loginEmail=loginEmail)
+    return render_template("guess.html", answer=theanswer, count=thecount, user=user)
 
 
 </t>
@@ -148,7 +166,8 @@ def red():
     # redirect to google
     return redirect("http://www.google.com")</t>
 <t tx="amd.20151020234043.1"></t>
-<t tx="amd.20151021000403.1">@app.route('/guessform')
+<t tx="amd.20151021000403.1">@login_required
+@app.route('/guessform')
 def guessform():
     session["count"] += 1
     guess = session.get("guess")
@@ -157,6 +176,8 @@ def guessform():
     return render_template("guessform.html", guess=guess, answer=theanswer, count=count)</t>
 <t tx="amd.20151021000629.1">@app.route('/docheck', methods=['POST'])
 def docheck():
+    if not session.get('login'):
+        return redirect(url_for('index'))
     # use session[] to save data
     # use session.get() to get session data
     # use request.form[] to get field data of form and send to template
@@ -187,7 +208,7 @@ def docheck():
         # 
         # got the answer, get count from session
         thecount = session.get('count')
-        return "Guess "+str(thecount)+" times, finally got the answer, the answer is "+str(theanswer)+": &lt;a href='/'&gt;Play again&lt;/a&gt;"
+        return "Guess "+str(thecount)+" times, finally got the answer, the answer is "+str(theanswer)+": &lt;a href='/guess'&gt;Play again&lt;/a&gt;"
     return render_template("docheck.html", guess=guess)
  </t>
 <t tx="leo.20200311103136.1">Location of openssl from https://www.msys2.org/
@@ -407,6 +428,7 @@ for i in range(len(group)):
 
 print(output)</t>
 <t tx="leo.20200409151441.1">@app.route("/randomgrouping")
+@login_required
 def randomGrouping():
     # url to get the student number data
     target_url = "http://mde.tw/cd2020/downloads/2020spring_cd_2a_list.txt"
@@ -720,12 +742,12 @@ Create OAuth client ID
 
 Application type: Web application</t>
 <t tx="yen.20200414111904.1">@app.route('/')
+@login_required
 def index():
-    
     return render_template('index.html')
 </t>
-<t tx="yen.20200414111938.1">@app.route('/autho_login/&lt;provider_name&gt;/', methods=['GET', 'POST'])
-def autho_login(provider_name):
+<t tx="yen.20200414111938.1">@app.route('/login/&lt;provider_name&gt;/', methods=['GET', 'POST'])
+def login(provider_name):
     
     # We need response object for the WerkzeugAdapter.
     response = make_response()
@@ -740,12 +762,15 @@ def autho_login(provider_name):
             result.user.update()
         
         # use session to save login user's email (試著將 @ 換為 _at_)
-        session['loginEmail'] = result.user.email.replace('@', '_at_')
+        #session['loginEmail'] = result.user.email.replace('@', '_at_')
+        loginUser = result.user.email.split("@")[0]
+        session["user"] = loginUser
+        session["login"] = True
         
         CALLBACK_URL = "https://localhost:8443/autho_login"
     
         # The rest happens inside the template.
-        return render_template('autho_login.html', result=result, CALLBACK_URL=CALLBACK_URL)
+        return render_template('login.html', result=result, CALLBACK_URL=CALLBACK_URL)
     
     # Don't forget to return the response.
     return response
@@ -792,7 +817,7 @@ local_data/db/database.db
 '''
 import os
 
-os.system("sqlite3 local_data/db/database.db &lt; schema.sql")
+os.system("sqlite3 db/database.db &lt; schema.sql")
 # echo string
 '''
 for Leo Editor:
@@ -809,8 +834,32 @@ import sqlite3
 g.es("sqlite3")</t>
 <t tx="yen.20200419202547.1">def __init__():
     # create required directory
+    if not os.path.isdir(_curdir+"db"):
+        try:
+            os.makedirs(_curdir+"db")
+        except:
+            print("db mkdir error")
     # create SQLite database file if not existed
-    g.es("do nothing")</t>
+    try:
+        conn = sqlite3.connect(_curdir+"db/database.db")
+        cur = conn.cursor()
+        # create table
+        cur.execute("CREATE TABLE IF NOT EXISTS grouping( \
+                id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                user TEXT not null, \
+                date TEXT not null, \
+                result TEXT not null, \
+                memo TEXT);")
+        cur.close()
+        conn.close()
+    except:
+        print("can not create db and table")
+    with closing(connect_db()) as db:
+        with app.open_resource('schema.sql' , mode='r') as f:
+            db.cursor().executescript(f.read())
+        db.commit()
+    g.es("do nothing")
+</t>
 <t tx="yen.20200419211033.1">On Mac
 
 dart2js located at
@@ -863,6 +912,7 @@ p is the presently selected position, the same as c.p.
 '''
 g.es("drawROC.js created")</t>
 <t tx="yen.20200419213555.1">@app.route('/drawROC')
+@login_required
 def drawROC():
     return render_template("drawROC.html")
     </t>
@@ -880,5 +930,27 @@ p is the presently selected position, the same as c.p.
 '''
 g.es("copy drawROC.js to ./../docs/downloads/")</t>
 <t tx="yen.20200419234118.1">https://www.arc.id.au/GearDrawing.html</t>
+<t tx="yen.20200420141224.1">def login_required(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'login' in session:
+            return f(*args, **kwargs)
+        else:
+            flash("You need to login first")
+            return redirect(url_for('index'))
+
+    return wrap
+</t>
+<t tx="yen.20200420143358.1">@app.route('/logout')
+def logout():
+    session.pop('login' , None)
+    session.pop('user', None)
+    flash('Logged out!')
+    return redirect(url_for('index'))</t>
+<t tx="yen.20200420144030.1">@app.route("/menu")
+@login_required
+def menu():
+    menuList = ["guess", "drawROC", "randomgrouping"]
+    return render_template("menu.html", menuList=menuList)</t>
 </tnodes>
 </leo_file>

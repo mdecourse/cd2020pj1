@@ -27,17 +27,31 @@
 <p>Use Google + Domain API to setup login for @gm.nfu.edu.tw users</p>
 <p><a href="https://console.developers.google.com">https://console.developers.google.com</a></p>
 <p>Setup <span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation">OAuth 2.0 Client IDs </span></p>
-<p>Use <a href="https://github.com/authomatic/authomatic">https://github.com/authomatic/authomatic</a> to allow user login with Google or Github accounts.<span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation"></span></p><h2>Python</h2>
-<h2>Dart</h2>
+<p>Use <a href="https://github.com/authomatic/authomatic">https://github.com/authomatic/authomatic</a> to allow user login with Google or Github accounts.<span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation"></span></p><h2>Dart</h2>
 <p>Use dart2js to compile Dart html program into javascript and interacted with Flask program.</p>
+<div></div>
 <div id="wrapper"><canvas height="200" id="canvas" width="300"></canvas><br/> <button id="button">Clear Canvas</button> <button id="roc">Draw ROC</button> <button id="usa">Draw USA</button></div>
 <script src="/downloads/drawROC.js">
-</script><h2>Flask</h2>
+</script>
+<h4>WebRTC</h4>
+<p style="padding-left: 30px;"><a href="https://pub.dev/packages/flutter_webrtc">https://pub.dev/packages/flutter_webrtc</a> </p>
+<p style="padding-left: 30px;"><a href="https://github.com/cloudwebrtc/flutter-webrtc">https://github.com/cloudwebrtc/flutter-webrtc</a></p><h2>Flask</h2>
 <h4><span>Python and Flask</span></h4>
 <p style="padding-left: 30px;"><span>Login to your gm email account and download <a href="https://drive.google.com/file/d/17_LCSvwgtnIG8FnpezfUlEdbo3Y6G6CP/view?usp=sharing">2019_ABeginnersGuideToPython3Programming.pdf</a></span></p>
 <p style="padding-left: 30px;"><span>Login to your gm email account and download <a href="https://drive.google.com/file/d/1u3PHIbGWz3r4bct_molJg8FODkS8tf02/view?usp=sharing">2019_BuildingRESTAPIsWithFlask.pdf</a></span></p>
 <p>The most important feature of REST is its statelessness, which simply means that<br/>neither the client nor the server has to know the state of each other to be able to communicate. In this way, both the client and the server can understand any message received without seeing the previous message.</p>
-<h2>Database</h2>
+<h4>Realtime Communication</h4>
+<p style="padding-left: 30px;"><a href="https://www.vonage.com/resources/articles/real-time-communications/">https://www.vonage.com/resources/articles/real-time-communications/</a></p>
+<p style="padding-left: 30px;"><a href="https://www.fullstackpython.com/webrtc.html">https://www.fullstackpython.com/webrtc.html</a></p>
+<h4>WebRTC</h4>
+<p style="padding-left: 30px;"><a href="https://av.tib.eu/media/20037">https://av.tib.eu/media/20037</a></p>
+<p style="padding-left: 30px;"><a href="https://github.com/nanomosfet/WebRTC-Flask-server">https://github.com/nanomosfet/WebRTC-Flask-server</a></p>
+<p style="padding-left: 30px;"><a href="https://webrtchacks.com/webrtc-cv-tensorflow/">https://webrtchacks.com/webrtc-cv-tensorflow/</a></p>
+<h4>Streaming Server</h4>
+<p style="padding-left: 30px;"><a href="https://blog.miguelgrinberg.com/post/video-streaming-with-flask">https://blog.miguelgrinberg.com/post/video-streaming-with-flask</a></p>
+<p style="padding-left: 30px;"><a href="https://github.com/miguelgrinberg/flask-video-streaming">https://github.com/miguelgrinberg/flask-video-streaming</a></p>
+<p style="padding-left: 30px;"><a href="https://opensource.com/article/19/1/gstreamer">https://opensource.com/article/19/1/gstreamer</a> </p>
+<p style="padding-left: 30px;"></p><h2>Database</h2>
 <h1>Linkages</h1>
 <p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/IjoSLafsA2w" width="560"></iframe></p>
 <p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/VI-d1C9MkOU" width="560"></iframe></p>
@@ -69,6 +83,11 @@
 <pre class="brush:lua;auto-links:false;toolbar:false" contenteditable="false">simRemoteApi.start(19999)</pre>
 <p style="padding-left: 30px;">Therefore user can control the simulated model through the CoppeliaSim_Server_IP on port 19999.</p>
 <pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">clientID = vrep.simxStart('CoppeliaSim_Server_IP',19999,True,True,5000,5) # Get the client ID</pre>
+<p style="padding-left: 30px;">Use</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">While True:</pre>
+<p style="padding-left: 30px;">to replace</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">for i in range(150):</pre>
+<p style="padding-left: 30px;">the image of the remote vision sensor will be sent to the remote API client through <a href="https://pypi.org/project/opencv-python/">https://pypi.org/project/opencv-python/</a></p>
 <p>reading and display vision sensor image using python remoate api (<a href="http://www.forum.coppeliarobotics.com/viewtopic.php?f=9&amp;t=7012#p27785">來源</a>)</p>
 <p>改為 Python 3 相容</p>
 <pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"># -*- coding: utf-8 -*-

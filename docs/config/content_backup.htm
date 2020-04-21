@@ -18,13 +18,18 @@
 <h4>2b Meet + Youtube +OBS</h4>
 <p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/FaOQiIGeK0U" width="560"></iframe></p>
 <p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/nJa4iIpCoyk" width="560"></iframe></p>
-<p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/YR4KroWEbKk" width="560"></iframe></p><h1>CMS</h1>
+<p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/YR4KroWEbKk" width="560"></iframe></p><h2>Windows</h2>
+<p>Use Firefox to conduct <a href="https://meet.google.com">https://meet.google.com</a> online meeting. Since we are using G Suite for Education, meeting recording and live stream functions are available.</p>
+<p>Use Firefox to connect to <a href="https://youtube.com">https://youtube.com</a> and add live stream video with OBS streaming integrated withYoutube server.</p><h2>Mac</h2>
+<p>Use Safari to conduct <a href="https://meet.google.com">https://meet.google.com</a> online meeting. Since we are using G Suite for Education, meeting recording and live stream functions are available.</p>
+<p>Even with System Preferences to grant "Screen Recording" privacy setup, Firefox does not allow user to share screen operation during online Google Handout Meet session.</p>
+<p>Use Firefox to connect to <a href="https://youtube.com">https://youtube.com</a> and add live stream video with OBS streaming integrated withYoutube server.</p><h1>CMS</h1>
 <p>Use Google + Domain API to setup login for @gm.nfu.edu.tw users</p>
 <p><a href="https://console.developers.google.com">https://console.developers.google.com</a></p>
 <p>Setup <span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation">OAuth 2.0 Client IDs </span></p>
 <p>Use <a href="https://github.com/authomatic/authomatic">https://github.com/authomatic/authomatic</a> to allow user login with Google or Github accounts.<span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation"></span></p><h2>Python</h2>
 <h2>Dart</h2>
-<p>Use dart2js to compile Dart html program to javascript and interacted with Flask program.</p>
+<p>Use dart2js to compile Dart html program into javascript and interacted with Flask program.</p>
 <div id="wrapper"><canvas height="200" id="canvas" width="300"></canvas><br/> <button id="button">Clear Canvas</button> <button id="roc">Draw ROC</button> <button id="usa">Draw USA</button></div>
 <script src="/downloads/drawROC.js">
 </script><h2>Flask</h2>
@@ -57,6 +62,13 @@
 <h3>RemoteAPI</h3>
 <p>Download <a href="https://drive.google.com/open?id=1uTCnYdN6PrUIGSSsjynNIT591EXvVUJA">web_vrep2.zip</a> (for @gm users only)</p>
 <p>Download <a href="https://drive.google.com/open?id=1KlnsgBFyp6OpCC_BlYH-jKL4uJixpoBl">CoppeliaSim_4_Self_Driving_Car_Simulation.7z</a> (for @gm users only)</p>
+<p style="padding-left: 30px;">When execute python remote api, opencv-python and imutils modules are needed.</p>
+<p style="padding-left: 60px;">pip install opencv-python</p>
+<p style="padding-left: 60px;">pip install imutils</p>
+<p style="padding-left: 30px;">DefaultCamera with threaded child script and start the simRemoteApi on port 19999.</p>
+<pre class="brush:lua;auto-links:false;toolbar:false" contenteditable="false">simRemoteApi.start(19999)</pre>
+<p style="padding-left: 30px;">Therefore user can control the simulated model through the CoppeliaSim_Server_IP on port 19999.</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">clientID = vrep.simxStart('CoppeliaSim_Server_IP',19999,True,True,5000,5) # Get the client ID</pre>
 <p>reading and display vision sensor image using python remoate api (<a href="http://www.forum.coppeliarobotics.com/viewtopic.php?f=9&amp;t=7012#p27785">來源</a>)</p>
 <p>改為 Python 3 相容</p>
 <pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"># -*- coding: utf-8 -*-
@@ -154,8 +166,7 @@ print('Program ended')</pre>
 <h4>參考資料</h4>
 <p style="padding-left: 30px;"><a href="/downloads/Virtual Experiments Design for Robotics Based on V-REP.pdf">Virtual Experiments Design for Robotics Based on V-REP.pdf</a></p>
 <p style="padding-left: 30px;"><a href="https://arxiv.org/pdf/1906.11176.pdf">Pyrep: bringing V-rep to deep robot learning.pdf</a></p>
-<p style="padding-left: 30px;"><a href="http://fid.cl/courses/ai-robotics/vrep-tut/pythonBubbleRob.pdf">Controlling your robot with Python.pdf</a></p>
-<h2>Webots</h2>
+<p style="padding-left: 30px;"><a href="http://fid.cl/courses/ai-robotics/vrep-tut/pythonBubbleRob.pdf">Controlling your robot with Python.pdf</a></p><h2>Webots</h2>
 <p><a href="https://cyberbotics.com/">https://cyberbotics.com/</a></p>
 <p></p>
 <p></p>

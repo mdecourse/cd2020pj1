@@ -248,7 +248,8 @@ def randomGrouping():
     
     # add grouping result into grouping table of /db/database.db
     date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
-    user = session.get("user")
+    #user = session.get("user")
+    user = "anon"
     result = str(group)
     # 希望新增重複資料查驗功能
     g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',

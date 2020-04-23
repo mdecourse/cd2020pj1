@@ -33,8 +33,10 @@
 <v t="yen.20200414151417.1"><vh>generate secret id for Flask</vh></v>
 <v t="yen.20200414142052.1"><vh>Google logout and redirect</vh></v>
 </v>
+<v t="yen.20200423213714.1"><vh>Starting Flask</vh>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
 <v t="yen.20200418212208.1"><vh>Save grouping result into database</vh></v>
+</v>
 </v>
 <v t="yen.20200419155906.1"><vh>Database</vh>
 <v t="yen.20200419155956.1"><vh>@edit schema.sql</vh></v>
@@ -1030,5 +1032,15 @@ def alogin():
             return redirect(url_for('menu'))
     return render_template('alogin.html' , error = error)
 </t>
+<t tx="yen.20200423213714.1">from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/') 
+def hello_world():
+    return 'Hello, From Flask!'
+
+if __name__== '__main__': 
+	app.run()</t>
 </tnodes>
 </leo_file>

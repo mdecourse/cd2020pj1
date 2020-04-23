@@ -248,8 +248,7 @@ def randomGrouping():
     
     # add grouping result into grouping table of /db/database.db
     date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
-    #user = session.get("user")
-    user = "anon"
+    user = session.get("user")
     result = str(group)
     # 希望新增重複資料查驗功能
     g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',
@@ -316,6 +315,20 @@ def getNumList(total, eachGrp=10):
 # root of the system can not set "login_required" decorator
 def index():
     return render_template('index.html')
+@app.route('/alogin' , methods=['GET' , 'POST'])
+def alogin():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != "admin":
+            error = '錯誤!'
+        elif request.form['password'] != "admin":
+            error = '錯誤!'
+        else :
+            session['login'] = True
+            session['user'] = "alogin"
+            flash('已經登入!')
+            return redirect(url_for('menu'))
+    return render_template('alogin.html' , error = error)
 @app.route('/login/<provider_name>/', methods=['GET', 'POST'])
 def login(provider_name):
     

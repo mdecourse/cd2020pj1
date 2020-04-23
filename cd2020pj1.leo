@@ -66,6 +66,7 @@
 <v t="yen.20200420153541.1"><vh>show_entries</vh></v>
 <v t="leo.20200409151603.1"><vh>getNumList</vh></v>
 <v t="yen.20200414111904.1"><vh>index</vh></v>
+<v t="yen.20200423112001.1"><vh>alogin</vh></v>
 <v t="yen.20200414111938.1"><vh>login</vh></v>
 <v t="yen.20200420143358.1"><vh>logout</vh></v>
 </v>
@@ -81,6 +82,7 @@
 <v t="amd.20151021000748.1"><vh>@edit docheck.html</vh></v>
 <v t="amd.20151021083709.1"><vh>@edit toobig.html</vh></v>
 <v t="amd.20151021083719.1"><vh>@edit toosmall.html</vh></v>
+<v t="yen.20200423112223.1"><vh>@edit alogin.html</vh></v>
 <v t="yen.20200414111626.1"><vh>@edit login.html</vh></v>
 <v t="yen.20200420144223.1"><vh>@edit menu.html</vh></v>
 <v t="yen.20200414111705.1"><vh>@edit index.html</vh></v>
@@ -517,8 +519,7 @@ def randomGrouping():
     
     # add grouping result into grouping table of /db/database.db
     date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
-    #user = session.get("user")
-    user = "anon"
+    user = session.get("user")
     result = str(group)
     # 希望新增重複資料查驗功能
     g.db.execute('insert into grouping (user , date, result, memo) values (? , ?, ?, ?)',
@@ -1014,5 +1015,20 @@ def add_entry():
 def before_request():
     # need to check if this works with Windows
     g.db = sqlite3.connect(_curdir+"/db/database.db")</t>
+<t tx="yen.20200423112001.1">@app.route('/alogin' , methods=['GET' , 'POST'])
+def alogin():
+    error = None
+    if request.method == 'POST':
+        if request.form['username'] != "admin":
+            error = '錯誤!'
+        elif request.form['password'] != "admin":
+            error = '錯誤!'
+        else :
+            session['login'] = True
+            session['user'] = "alogin"
+            flash('已經登入!')
+            return redirect(url_for('menu'))
+    return render_template('alogin.html' , error = error)
+</t>
 </tnodes>
 </leo_file>

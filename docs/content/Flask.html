@@ -143,7 +143,7 @@ img.add_border {
                             <li><a href="./../blog/index.html">blog</a></li>
                         </ul>
                       </li>
-                     <li><a href='About.html'>About</a><li class='has-children'><a href='Streaming.html'>Streaming</a><ul class='dropdown'><li><a href='Windows.html'>Windows</a><li><a href='Mac.html'>Mac</a></li></ul><li class='has-children'><a href='CMS.html'>CMS</a><ul class='dropdown'><li><a href='Dart.html'>Dart</a><li><a href='Flask.html'>Flask</a><li><a href='Database.html'>Database</a></li></ul><li class='has-children'><a href='Linkages.html'>Linkages</a><ul class='dropdown'><li><a href='Solvespace.html'>Solvespace</a><li><a href='Pyslvs-UI.html'>Pyslvs-UI</a><li><a href='Range3.html'>Range3</a></li></ul><li class='has-children'><a href='Mechatronics.html'>Mechatronics</a><ul class='dropdown'><li class='has-children'><a href='Arduino.html'>Arduino</a><ul class='dropdown'><li><a href='Picsimlab.html'>Picsimlab</a><li><a href='Unoardusim.html'>Unoardusim</a></li></ul><li class='has-children'><a href='CoppeliaSim.html'>CoppeliaSim</a><ul class='dropdown'><li><a href='RemoteAPI.html'>RemoteAPI</a></li></ul><li><a href='Webots.html'>Webots</a></li>
+                     <li><a href='About.html'>About</a><li class='has-children'><a href='Streaming.html'>Streaming</a><ul class='dropdown'><li><a href='Windows.html'>Windows</a><li><a href='Ubuntu.html'>Ubuntu</a><li><a href='Mac.html'>Mac</a></li></ul><li class='has-children'><a href='CMS.html'>CMS</a><ul class='dropdown'><li><a href='Flask.html'>Flask</a><li><a href='Dart.html'>Dart</a><li><a href='Database.html'>Database</a></li></ul><li class='has-children'><a href='Linkages.html'>Linkages</a><ul class='dropdown'><li><a href='Solvespace.html'>Solvespace</a><li><a href='Pyslvs-UI.html'>Pyslvs-UI</a><li><a href='Range3.html'>Range3</a></li></ul><li class='has-children'><a href='Mechatronics.html'>Mechatronics</a><ul class='dropdown'><li class='has-children'><a href='Arduino.html'>Arduino</a><ul class='dropdown'><li><a href='Picsimlab.html'>Picsimlab</a><li><a href='Unoardusim.html'>Unoardusim</a></li></ul><li class='has-children'><a href='CoppeliaSim.html'>CoppeliaSim</a><ul class='dropdown'><li><a href='RemoteAPI.html'>RemoteAPI</a></li></ul><li><a href='Webots.html'>Webots</a></li>
                       </ul>
                 </nav>
               </div>
@@ -154,10 +154,23 @@ img.add_border {
           </div>
           
         </header>
-    <div id="tipue_search_content">Dart << <a href='Dart.html'>Previous</a> <a href='Database.html'>Next</a> >> Database<br /><h1>Flask</h1>
+    <div id="tipue_search_content">CMS << <a href='CMS.html'>Previous</a> <a href='Dart.html'>Next</a> >> Dart<br /><h1>Flask</h1>
 <h4><span>Python and Flask</span></h4>
 <p style="padding-left: 30px;"><span>Login to your gm email account and download <a href="https://drive.google.com/file/d/17_LCSvwgtnIG8FnpezfUlEdbo3Y6G6CP/view?usp=sharing">2019_ABeginnersGuideToPython3Programming.pdf</a></span></p>
 <p style="padding-left: 30px;"><span>Login to your gm email account and download <a href="https://drive.google.com/file/d/1u3PHIbGWz3r4bct_molJg8FODkS8tf02/view?usp=sharing">2019_BuildingRESTAPIsWithFlask.pdf</a></span></p>
+<p>Flask has two major components, Werkzeug and Jinja2. While Werkzeug is responsible for providing routing, debugging, and Web Server Gateway Interface (WSGI), Flask leverages Jinja2 as template engine.</p>
+<p>Basic Flask application:</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/') 
+def hello_world():
+    return 'Hello, From Flask!'
+
+if __name__== '__main__': 
+	app.run()</pre>
+<p>The preceding code imports the Flask library, initiates the application by creating an instance of the Flask class, declares the route, and then defines the function to execute when the route is called. This code is enough to start your first Flask application.</p>
 <p>The most important feature of REST is its statelessness, which simply means that<br/>neither the client nor the server has to know the state of each other to be able to communicate. In this way, both the client and the server can understand any message received without seeing the previous message.</p>
 <h4>Realtime Communication</h4>
 <p style="padding-left: 30px;"><a href="https://www.vonage.com/resources/articles/real-time-communications/">https://www.vonage.com/resources/articles/real-time-communications/</a></p>
@@ -170,7 +183,7 @@ img.add_border {
 <p style="padding-left: 30px;"><a href="https://blog.miguelgrinberg.com/post/video-streaming-with-flask">https://blog.miguelgrinberg.com/post/video-streaming-with-flask</a></p>
 <p style="padding-left: 30px;"><a href="https://github.com/miguelgrinberg/flask-video-streaming">https://github.com/miguelgrinberg/flask-video-streaming</a></p>
 <p style="padding-left: 30px;"><a>https://opensource.com/article/19/1/gstreamer</a><a href="https://www.pyimagesearch.com/2019/04/15/live-video-streaming-over-network-with-opencv-and-imagezmq/">https://www.pyimagesearch.com/2019/04/15/live-video-streaming-over-network-with-opencv-and-imagezmq/</a></p>
-<p style="padding-left: 30px;"></p><br />Dart << <a href='Dart.html'>Previous</a> <a href='Database.html'>Next</a> >> Database</div>
+<p style="padding-left: 30px;"></p><br />CMS << <a href='CMS.html'>Previous</a> <a href='Dart.html'>Next</a> >> Dart</div>
         
     <!-- footer -->
       <div class="container">

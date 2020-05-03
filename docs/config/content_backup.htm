@@ -30,6 +30,7 @@
 <h4>5. 將 Remote API 程式結合 Flask + Oauth2 + SQLite 進行 網際機電控制程式開發</h4>
 <h4>6. 利用 Ubuntu 20.04 虛擬主機, 進行網際協同機電系統操控模擬</h4>
 <h4>7. 協同四輪車與平面機構系統產品整合開發</h4>
+<h3>git</h3>
 <p></p>
 <p></p>
 <p style="padding-left: 30px;"></p>
@@ -274,6 +275,17 @@ portIndex2_debug            = false
 portIndex2_syncSimTrigger   = true
 </pre>
 <p>然後利用 CoppeliaSim 已經開啟的 19999 埠號, 從 client 端以 Python remote API 程式控制遠端 Server 上的機電系統, 主要關鍵在於啟動連線, 開啟場景檔案, 然後啟動該場景的模擬後, 取得遠端模擬<a href="https://www.coppeliarobotics.com/helpFiles/en/visionSensors.htm"> vision sensor</a> 的影像後進行 remote 操控:</p>
+<p>有關 vision sensor 與 camera 的差異:</p>
+<p>Make sure not to mix-up vision sensors with <a href="https://www.coppeliarobotics.com/helpFiles/en/cameras.htm">cameras</a>. Following are the main differences:</p>
+<p style="padding-left: 30px;"></p>
+<ul>
+<li>A vision sensor has a fixed resolution. A camera has no specific resolution (i.e. it adjusts automatically to the view size).</li>
+<li>A vision sensor's image content can be accessed via the <a href="https://www.coppeliarobotics.com/helpFiles/en/apisOverview.htm">API</a>, and image processing handles via <a href="https://www.coppeliarobotics.com/helpFiles/en/visionCallbackFunctions.htm">vision callback functions</a>. A camera's image content is not directly available via the API.</li>
+<li>A vision sensor generally requires more CPU time and operates slower than cameras.</li>
+<li>A vision sensor can only display <a href="https://www.coppeliarobotics.com/helpFiles/en/renderableObjects.htm">renderable objects</a>. A camera can display all <a href="https://www.coppeliarobotics.com/helpFiles/en/objects.htm">object types</a>.</li>
+</ul>
+<p></p>
+<p>Vision sensors are added to the <a href="https://www.coppeliarobotics.com/helpFiles/en/scenes.htm">scene</a> with [menu bar --&gt; Add --&gt; Vision sensor].</p>
 <pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">clientID = vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Get the client ID
 res=vrep.simxLoadScene(clientID,"Y:\CoppeliaSim_4_Self_Driving_Car_Simulation\sdc.ttt",0,vrep.simx_opmode_blocking)
 x =vrep.simxStartSimulation(clientID,vrep.simx_opmode_oneshot_wait) </pre>

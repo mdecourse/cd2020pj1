@@ -5,27 +5,221 @@
 <p>Website: <a href="https://mde.tw/cd2020pj1">https://mde.tw/cd2020pj1</a></p>
 <p>Repository: <a href="https://github.com/mdecourse/cd2020pj1">https://github.com/mdecourse/cd2020pj1</a></p>
 <h2>Tasks</h2>
-<p>協同產品設計課程實習項目:</p>
-<ol>
-<li>OnShape 零組件繪圖及協同設定</li>
-<li> 零組件轉檔進入 CoppeliaSim</li>
-<li>CoppeliaSim 零組件轉入後之零件分割, 零件從屬關係組立與控制設定</li>
-<li>利用 CoppeliaSim Python Remote API 控制四輪車</li>
-<li>將 Remote API 程式結合 Flask + Oauth2 + SQLite 進行 網際機電控制程式開發</li>
-<li>利用 Ubuntu 20.04 虛擬主機, 進行網際協同機電系統操控模擬</li>
-<li>協同四輪車與平面機構系統產品整合開發</li>
-</ol>
-<h4>OnShape 零組件繪圖及協同設定</h4>
+<h4>協同產品設計課程實習項目:</h4>
+<h4>1. OnShape 零組件繪圖及協同設定</h4>
 <p style="padding-left: 30px;"><a href="https://learn.onshape.com/">https://learn.onshape.com/</a></p>
-<h4>零組件轉檔進入 CoppeliaSim</h4>
+<h4>2. 零組件轉檔進入 CoppeliaSim</h4>
 <h4 style="padding-left: 30px;">Parasolid</h4>
 <p style="padding-left: 60px;"><a href="/downloads/Parasolid-XT-format-reference_2006.pdf">Parasolid-XT-format-reference_2006.pdf</a></p>
 <h4 style="padding-left: 30px;">SAT</h4>
 <p style="padding-left: 60px;"><a href="/downloads/sat_file_format.pdf">Sat File format.pdf</a></p>
-<p style="padding-left: 60px;"><a href="https://en.wikipedia.org/wiki/ACIS">https://en.wikipedia.org/wiki/ACIS</a> </p>
+<p style="padding-left: 60px;"><a href="https://en.wikipedia.org/wiki/ACIS">https://en.wikipedia.org/wiki/ACIS</a></p>
 <h4 style="padding-left: 30px;">DXF, IGES and STEP</h4>
 <p style="padding-left: 60px;"><a href="/downloads/dxf_iges_step.pdf">DXF_IGES_STEP.pdf</a></p>
+<h4>3. CoppeliaSim 零組件轉入後之零件分割, 零件從屬關係組立與控制設定</h4>
+<h4>4. 利用 CoppeliaSim Python Remote API 控制四輪車</h4>
+<p style="padding-left: 30px;"><a href="http://mde.tw/wcmj2020/content/%E5%8F%AF%E6%94%9C%E7%A8%8B%E5%BC%8F%E7%92%B0%E5%A2%83.html">五專網際內容管理系統中使用的可攜程式下載</a> (登入 @gm)</p>
+<p style="padding-left: 30px;"><a href="https://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm">https://www.coppeliarobotics.com/helpFiles/en/remoteApiClientSide.htm</a></p>
+<p style="padding-left: 30px;"><a href="https://programmer.group/v-rep-adding-vision-sensor-and-image-acquisition.html">https://programmer.group/v-rep-adding-vision-sensor-and-image-acquisition.html</a></p>
+<p style="padding-left: 30px;"><a href="https://gist.github.com/mstfldmr/45d6e47bb661800b982c39d30215bc88">https://gist.github.com/mstfldmr/45d6e47bb661800b982c39d30215bc88</a></p>
+<p style="padding-left: 30px;"><a href="https://stackoverflow.com/questions/52325679/flask-opencv-send-and-receive-images-in-bytes">https://stackoverflow.com/questions/52325679/flask-opencv-send-and-receive-images-in-bytes</a></p>
+<h4>5. 將 Remote API 程式結合 Flask + Oauth2 + SQLite 進行 網際機電控制程式開發</h4>
+<h4>https-server.py</h4>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from flask import Flask, render_template
+import ssl
+
+context = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+context.load_cert_chain('./../cd2020.crt', './../cd2020.key')
+
+app = Flask(__name__)
+
+@app.route('/') 
+def hello_world():
+    return 'Hello, From Flask!'
+
+@app.route('/drawROC')
+def drawROC():
+    return render_template("drawROC.html")
+    
+if __name__== '__main__': 
+	app.run(ssl_context=context)</pre>
+<h4>http-server.py</h4>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">from flask import Flask, render_template, send_from_directory
+
+# for randomgrouping
+import random
+import requests
+
+app = Flask(__name__)
+
+@app.route('/') 
+def hello_world():
+    return 'Hello, From Flask!'
+    
+@app.route('/drawROC')
+def drawROC():
+    return render_template("drawROC.html")
+    
+# setup static directory
+@app.route('/static/&lt;path:path&gt;')
+def send_static(path):
+    return send_from_directory('static', path)
+    
+@app.route("/randomgrouping")
+def randomGrouping():
+    # url to get the student number data
+    target_url = "http://mde.tw/cd2020/downloads/2020spring_cd_2a_list.txt"
+    # use requests to retrieve data from url
+    f = requests.get(target_url)
+    # get student list from target_url
+    # use splitlines() to put student number into studList
+    studList = f.text.splitlines()
+    # minimum number for each group
+    num_in_one_group = 10
+    # temp list to save the student number for each group
+    gpList = []
+    # whole class list
+    group = []
+    # number of member list for each group
+    numList = []
+    # get numList
+    numList = getNumList(len(studList), num_in_one_group)
+    # check numList
+    # list numList
+    #print("Expected number of member list:" + str(numList))
+    
+    output = ""
+    gth = 1
+    inc = 0
+    
+    # use shuffle method of random module to shuffle studList
+    random.shuffle(studList)
+    output += "Before sort: &lt;br /&gt;"
+    for i in numList:
+        # print 20 * sign
+        output += '=' * 20 + "&lt;br /&gt;";
+        output += "group " + str(gth) + " has " + str(i) + " members:&lt;br /&gt;"
+        # reset group list
+        gpList = []
+        for j in range(i):
+            output += studList[j+inc] + "&lt;br /&gt;"
+            # append student number into grpList
+            gpList.append(studList[j+inc])
+
+        gth = gth + 1
+        inc = inc + j
+        # sort gpList
+        gpList.sort()
+        group.append(gpList)
+
+    # print output which is the result before sorting
+    print(output)
+    # print group whis is the sorted result
+    print("Sorted result:" + str(group))
+
+    output = ""
+    # output sorted result
+    output += '=' * 20 + "&lt;br /&gt;"
+    output += 'Sorted result:&lt;br /&gt;'
+    gth = 1
+
+    # list sorted data seperated by \n
+    for i in range(len(group)):
+        # print seperated mark
+        output += '=' * 20 + "&lt;br /&gt;"
+        output += "group" + str(gth) + "&lt;br /&gt;"
+        gpList = []
+
+        for j in range(len(group[i])):
+            output += str(group[i][j]) + "&lt;br /&gt;"
+
+        gth = gth + 1
+
+    return output
+
+# get the distributed list among each group
+def getNumList(total, eachGrp=10):
+    # total is the number of students
+    # each group at least 10 students
+    #eachGrp = 10;
+    # may divide into "grpNum" number of group
+    grpNum = total // eachGrp;
+    # check grpNum
+    #print(grpNum)
+    # vacan list
+    splits = []
+    # find remainder when total number divid into "grpNum" number of group
+    remainder = total % grpNum
+    # number of people in one group by calculation
+    calGrp = total // grpNum
+
+    for i in range(grpNum):
+        splits.append(calGrp)
+
+    # check first splits
+    #print(splits)
+
+    for i in range(remainder):
+        splits[i] += 1
+
+    # check final splits
+    #print(splits);
+    return splits;
+
+    
+if __name__== '__main__': 
+	app.run()</pre>
+<h4 style="padding-left: 30px;">Oauth2 設定:</h4>
+<h4 style="padding-left: 60px;">設定網址:<br/><br/><a href="https://console.developers.google.com">https://console.developers.google.com</a> <br/><br/>總共有兩項設定:<br/><br/>1. 啟用 Google + API<br/><br/>2. 然後到憑證處建立專案, 設定授權的 URI</h4>
+<h4 style="padding-left: 30px;">Flask and SQLite:</h4>
+<p style="padding-left: 60px;"><a href="https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/">https://flask.palletsprojects.com/en/1.1.x/patterns/sqlite3/</a></p>
+<h4>6. 利用 Ubuntu 20.04 虛擬主機, 進行網際協同機電系統操控模擬</h4>
+<p style="padding-left: 30px;">Login to @gm account and download <a href="https://drive.google.com/open?id=143jFMheM1xjLxhLkSAouThLzj3WUYX6_">Virtualbox appliance of Ubuntu 20.04</a> for CMSiMDE, Oauth2 and CoppeliaSim remote API program development.</p>
+<h4>7. 協同四輪車與平面機構系統產品整合開發</h4>
+<p style="padding-left: 30px;"><a href="https://stackoverflow.com/questions/42787927/displaying-opencv-image-using-python-flask">https://stackoverflow.com/questions/42787927/displaying-opencv-image-using-python-flask</a></p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">import vrep
+
+print('Program started')
+vrep.simxFinish(-1) # just in case, close all opened connections
+clientID=vrep.simxStart('127.0.0.1',19997,True,True,5000,5)
+if clientID!=-1:
+    print('Connected to remote API server')
+    # relative to remote API client location, relative path:
+    vrep.simxLoadScene(clientID,'test/testScene.ttt',0xFF,vrep.simx_opmode_blocking)
+    # relative to V-REP executable location, relative path:
+    vrep.simxLoadScene(clientID,'scenes/collisionDetectionDemo.ttt',0x00,vrep.simx_opmode_blocking)
+    # relative to remote API client location, absolute path:
+    vrep.simxLoadScene(clientID,'c:/python27/test/testScene.ttt',0xFF,vrep.simx_opmode_blocking)
+    # relative to V-REP executable location, absolute path:
+    vrep.simxLoadScene(clientID,'d:/v_rep/qrelease/release/scenes/collisionDetectionDemo.ttt',0x00,vrep.simx_opmode_blocking)
+    vrep.simxFinish(clientID)
+else:
+    print('Failed connecting to remote API server')
+print('Program ended')</pre>
+<p><br/><br/><br/>Firewall</p>
+<p></p>
 <p style="padding-left: 30px;"></p>
+<p></p><h3>Firewall</h3>
+<h4>讓 Windows 10 可以接受 ping 封包</h4>
+<h4>進入防火牆進階設定:</h4>
+<p style="padding-left: 30px;">檔案及印表機共用 (回應要求 - ICMPv4-In) 私人, 公用與網域的防火牆權限開啟</p>
+<p style="padding-left: 30px;">檔案及印表機共用 (回應要求 - ICMPv6-In) 私人, 公用與網域的防火牆權限開啟</p>
+<h3>Virtualbox</h3>
+<p>由於每一個虛擬主機的硬碟檔案必須擁有一個獨立的 UUID, 因此若複製虛擬硬碟檔案後, 必須利用</p>
+<pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false">"c:\Program Files\Oracle\VirtualBox\VBoxManage.exe" internalcommands sethduuid win10_64_comsol5.5.vmdk</pre>
+<p>指令更改虛擬硬碟檔案的 UUID, 才能配置在同一 Virtualbox 系統下.</p>
+<h4>虛擬主機的網路設定</h4>
+<p>NAT</p>
+<p>Host only</p>
+<p>Bridged</p>
+<h3>OpenCV</h3>
+<p><a href="https://stackoverflow.com/questions/38030263/how-to-send-an-image-from-flask-server-to-javascript-display-on-frontend/40307539#40307539">https://stackoverflow.com/questions/38030263/how-to-send-an-image-from-flask-server-to-javascript-display-on-frontend/40307539#40307539</a></p>
+<p><a href="https://stackoverflow.com/questions/46373163/passing-a-cv2-frame-from-view-to-template">https://stackoverflow.com/questions/46373163/passing-a-cv2-frame-from-view-to-template</a> </p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">@app.route('/image')
+def image():
+    img = cv2.imread('raw.png')
+    data = cv.imencode('.png', img)[1].tobytes()
+    return Response(b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + data + b'\r\n\r\n', mimetype='multipart/x-mixed-replace; boundary=frame'</pre>
 <p></p><h1>Streaming</h1>
 <h4>問卷:</h4>
 <p style="padding-left: 30px;">請登入 ＠gm 帳號後, 填寫下列問卷.</p>
@@ -57,20 +251,26 @@
 <li style="padding-left: 30px;">完成上述各步驟後, 將繼續進行線上課程之其他內容直播或錄影.</li>
 </ol>
 <h4 style="padding-left: 30px;">2a</h4>
-<p style="padding-left: 60px;"><a href="https://drive.google.com/file/d/1kmu5oLunO6_97dDLZoQ2OzGh29KeMH91/view?usp=sharing">https://drive.google.com/file/d/1kmu5oLunO6_97dDLZoQ2OzGh29KeMH91/view?usp=sharing</a>  (登入 @gm 帳號後可以在線觀看)</p>
-<p style="padding-left: 60px;"><a href="https://drive.google.com/file/d/120lV8i8yvKzEkF5kF2efpY-zuPc_G5kl/view?usp=sharing">https://drive.google.com/file/d/120lV8i8yvKzEkF5kF2efpY-zuPc_G5kl/view?usp=sharing</a> (登入 @gm 帳號後可以在線觀看)</p><h2>Windows</h2>
+<p style="padding-left: 60px;"><a href="https://drive.google.com/file/d/1kmu5oLunO6_97dDLZoQ2OzGh29KeMH91/view?usp=sharing">https://drive.google.com/file/d/1kmu5oLunO6_97dDLZoQ2OzGh29KeMH91/view?usp=sharing</a> (登入 @gm 帳號後可以在線觀看)</p>
+<p style="padding-left: 60px;"><a href="https://drive.google.com/file/d/120lV8i8yvKzEkF5kF2efpY-zuPc_G5kl/view?usp=sharing">https://drive.google.com/file/d/120lV8i8yvKzEkF5kF2efpY-zuPc_G5kl/view?usp=sharing</a> (登入 @gm 帳號後可以在線觀看)</p>
+<h4 style="padding-left: 30px;">2b</h4>
+<p style="padding-left: 60px;"><a href="https://drive.google.com/file/d/1LkVizKKucLDV2mUkOrBqhkUhIfFsRDbX/view?usp=sharing">https://drive.google.com/file/d/1LkVizKKucLDV2mUkOrBqhkUhIfFsRDbX/view?usp=sharing</a> (登入 @gm 帳號後可以在線觀看)</p><h2>Windows</h2>
 <p>Use Firefox to conduct <a href="https://meet.google.com">https://meet.google.com</a> online meeting. Since we are using G Suite for Education, meeting recording and live stream functions are available.</p>
-<p>Use Firefox to connect to <a href="https://youtube.com">https://youtube.com</a> and add live stream video with OBS streaming integrated withYoutube server.</p><h2>Ubuntu</h2>
+<p>Use Firefox to connect to <a href="https://youtube.com">https://youtube.com</a> and add live stream video with OBS streaming integrated withYoutube server.</p>
+<h2>Ubuntu</h2>
 <p>Login to @gm account and download <a href="https://drive.google.com/open?id=143jFMheM1xjLxhLkSAouThLzj3WUYX6_">Virtualbox appliance of Ubuntu 20.04</a> for CMSiMDE, Oauth2 and CoppeliaSim remote API program development.</p>
 <h4>Install OBS for Ubuntu</h4>
-<p><a href="https://obsproject.com/wiki/install-instructions#ubuntu-installation">https://obsproject.com/wiki/install-instructions#ubuntu-installation</a> </p><h2>Mac</h2>
+<p><a href="https://obsproject.com/wiki/install-instructions#ubuntu-installation">https://obsproject.com/wiki/install-instructions#ubuntu-installation</a></p>
+<h2>Mac</h2>
 <p>Use Safari to conduct <a href="https://meet.google.com">https://meet.google.com</a> online meeting. Since we are using G Suite for Education, meeting recording and live stream functions are available.</p>
 <p>Even with System Preferences to grant "Screen Recording" privacy setup, Firefox does not allow user to share screen operation during online Google Handout Meet session.</p>
-<p>Use Firefox to connect to <a href="https://youtube.com">https://youtube.com</a> and add live stream video with OBS streaming integrated withYoutube server.</p><h1>CMS</h1>
+<p>Use Firefox to connect to <a href="https://youtube.com">https://youtube.com</a> and add live stream video with OBS streaming integrated withYoutube server.</p>
+<h1>CMS</h1>
 <p>Use Google + Domain API to setup login for @gm.nfu.edu.tw users</p>
 <p><a href="https://console.developers.google.com">https://console.developers.google.com</a></p>
 <p>Setup <span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation">OAuth 2.0 Client IDs </span></p>
-<p>Use <a href="https://github.com/authomatic/authomatic">https://github.com/authomatic/authomatic</a> to allow user login with Google or Github accounts.<span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation"></span></p><h2>Flask</h2>
+<p>Use <a href="https://github.com/authomatic/authomatic">https://github.com/authomatic/authomatic</a> to allow user login with Google or Github accounts.<span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation"></span></p>
+<h2>Flask</h2>
 <h4><span>Python and Flask</span></h4>
 <p style="padding-left: 30px;"><span>Login to your gm email account and download <a href="https://drive.google.com/file/d/17_LCSvwgtnIG8FnpezfUlEdbo3Y6G6CP/view?usp=sharing">2019_ABeginnersGuideToPython3Programming.pdf</a></span></p>
 <p style="padding-left: 30px;"><span>Login to your gm email account and download <a href="https://drive.google.com/file/d/1u3PHIbGWz3r4bct_molJg8FODkS8tf02/view?usp=sharing">2019_BuildingRESTAPIsWithFlask.pdf</a></span></p>
@@ -99,6 +299,8 @@ if __name__== '__main__':
 <p style="padding-left: 30px;"><a href="https://blog.miguelgrinberg.com/post/video-streaming-with-flask">https://blog.miguelgrinberg.com/post/video-streaming-with-flask</a></p>
 <p style="padding-left: 30px;"><a href="https://github.com/miguelgrinberg/flask-video-streaming">https://github.com/miguelgrinberg/flask-video-streaming</a></p>
 <p style="padding-left: 30px;"><a>https://opensource.com/article/19/1/gstreamer</a><a href="https://www.pyimagesearch.com/2019/04/15/live-video-streaming-over-network-with-opencv-and-imagezmq/">https://www.pyimagesearch.com/2019/04/15/live-video-streaming-over-network-with-opencv-and-imagezmq/</a></p>
+<h4>IOT</h4>
+<p style="padding-left: 30px;"><a href="https://dreamingecho.es/blog/internet-of-things-with-python-and-flask">https://dreamingecho.es/blog/internet-of-things-with-python-and-flask</a> </p>
 <p style="padding-left: 30px;"></p><h2>Dart</h2>
 <p>Use dart2js to compile Dart html program into javascript and interacted with Flask program.</p>
 <div></div>
@@ -108,7 +310,8 @@ if __name__== '__main__':
 <h4>WebRTC</h4>
 <p style="padding-left: 30px;"><a href="https://pub.dev/packages/flutter_webrtc">https://pub.dev/packages/flutter_webrtc</a></p>
 <p style="padding-left: 30px;"><a href="https://github.com/cloudwebrtc/flutter-webrtc">https://github.com/cloudwebrtc/flutter-webrtc</a></p>
-<h2>Database</h2><h1>Linkages</h1>
+<h2>Database</h2>
+<h1>Linkages</h1>
 <p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/IjoSLafsA2w" width="560"></iframe></p>
 <p><iframe allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen="allowfullscreen" frameborder="0" height="315" src="https://www.youtube.com/embed/VI-d1C9MkOU" width="560"></iframe></p>
 <h2>Solvespace</h2>
@@ -241,7 +444,8 @@ print('Program ended')</pre>
 <h4>參考資料</h4>
 <p style="padding-left: 30px;"><a href="/downloads/Virtual Experiments Design for Robotics Based on V-REP.pdf">Virtual Experiments Design for Robotics Based on V-REP.pdf</a></p>
 <p style="padding-left: 30px;"><a href="https://arxiv.org/pdf/1906.11176.pdf">Pyrep: bringing V-rep to deep robot learning.pdf</a></p>
-<p style="padding-left: 30px;"><a href="http://fid.cl/courses/ai-robotics/vrep-tut/pythonBubbleRob.pdf">Controlling your robot with Python.pdf</a></p><h2>Webots</h2>
+<p style="padding-left: 30px;"><a href="http://fid.cl/courses/ai-robotics/vrep-tut/pythonBubbleRob.pdf">Controlling your robot with Python.pdf</a></p>
+<h2>Webots</h2>
 <p><a href="https://cyberbotics.com/">https://cyberbotics.com/</a></p>
 <p></p>
 <p></p>

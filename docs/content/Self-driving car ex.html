@@ -154,7 +154,170 @@ img.add_border {
           </div>
           
         </header>
-    <div id="tipue_search_content">Dart << <a href='Dart.html'>Previous</a> <a href='Linkages.html'>Next</a> >> Linkages<br /><h1>Database</h1><br />Dart << <a href='Dart.html'>Previous</a> <a href='Linkages.html'>Next</a> >> Linkages</div>
+    <div id="tipue_search_content">RemoteAPI << <a href='RemoteAPI.html'>Previous</a> <a href='Webots.html'>Next</a> >> Webots<br /><h1>Self-driving car ex</h1>
+<p>以下所使用的場景與原始控制程式:</p>
+<p style="padding-left: 30px;">Download <a href="https://drive.google.com/open?id=1KlnsgBFyp6OpCC_BlYH-jKL4uJixpoBl">CoppeliaSim_4_Self_Driving_Car_Simulation.7z</a> (for @gm users only)</p>
+<p>設定 CoppeliaSim 目錄中的 remoteApiConnections.txt 檔, 啟動時開啟內建的 19997 與 19999 埠號.</p>
+<h4>remoteApiConnections.txt</h4>
+<pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false">// This file defines all the continuous remote API server services (started at remote API plugin initialization, i.e. CoppeliaSim start-up)
+//
+// Each remote API server service requires following 3 entries:
+//
+// portIndex@_port = xxxx               // where xxxx is the desired port number (below 19997 are preferred for server services starting at CoppeliaSim start-up)
+// portIndex@_debug = xxxx              // where xxxx is true or false
+// portIndex@_syncSimTrigger = xxxx     // where xxxx is true or false. When true, then the service will be pre-enabled for synchronous operation.
+//
+// In above strings, @ can be any number starting with 1. If more than one server service is required, then numbers need to be consecutive and starting with 1
+
+// Let's start a continuous remote API server service on port 19997:
+portIndex1_port             = 19997
+portIndex1_debug            = false
+portIndex1_syncSimTrigger   = true
+
+portIndex2_port             = 19999
+portIndex2_debug            = false
+portIndex2_syncSimTrigger   = true
+</pre>
+<p>然後利用 CoppeliaSim 已經開啟的 19999 埠號, 從 client 端以 Python remote API 程式控制遠端 Server 上的機電系統, 主要關鍵在於啟動連線, 開啟場景檔案, 然後啟動該場景的模擬後, 取得遠端模擬<a href="https://www.coppeliarobotics.com/helpFiles/en/visionSensors.htm"> vision sensor</a> 的影像後進行 remote 操控:</p>
+<p>有關 vision sensor 與 camera 的差異:</p>
+<p>Make sure not to mix-up vision sensors with <a href="https://www.coppeliarobotics.com/helpFiles/en/cameras.htm">cameras</a>. Following are the main differences:</p>
+<p style="padding-left: 30px;"></p>
+<ul>
+<li>A vision sensor has a fixed resolution. A camera has no specific resolution (i.e. it adjusts automatically to the view size).</li>
+<li>A vision sensor's image content can be accessed via the <a href="https://www.coppeliarobotics.com/helpFiles/en/apisOverview.htm">API</a>, and image processing handles via <a href="https://www.coppeliarobotics.com/helpFiles/en/visionCallbackFunctions.htm">vision callback functions</a>. A camera's image content is not directly available via the API.</li>
+<li>A vision sensor generally requires more CPU time and operates slower than cameras.</li>
+<li>A vision sensor can only display <a href="https://www.coppeliarobotics.com/helpFiles/en/renderableObjects.htm">renderable objects</a>. A camera can display all <a href="https://www.coppeliarobotics.com/helpFiles/en/objects.htm">object types</a>.</li>
+</ul>
+<p></p>
+<p>Vision sensors are added to the <a href="https://www.coppeliarobotics.com/helpFiles/en/scenes.htm">scene</a> with [menu bar --&gt; Add --&gt; Vision sensor].</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">clientID = vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Get the client ID
+res=vrep.simxLoadScene(clientID,"Y:\CoppeliaSim_4_Self_Driving_Car_Simulation\sdc.ttt",0,vrep.simx_opmode_blocking)
+x =vrep.simxStartSimulation(clientID,vrep.simx_opmode_oneshot_wait) </pre>
+<p>以下則為完整的 car_model.py:</p>
+<pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false"># -*- coding: utf-8 -*-
+"""
+Created on Tue Jan 06 22:00:39 2015
+
+@author: Karan Vivek Bhargava
+"""
+#Import Libraries:
+import vrep                  #V-rep library
+import sys
+import time                #used to keep track of time
+import numpy as np         #array library
+import cv2
+import imutils
+
+# Model for the car with two variables throttle and steering
+class CarControl():
+    def __init__(self, clientID, printFlag = False):
+        self.clientID = clientID;
+        # retrieve motor  handles
+        errorCode, self.steer_handle = vrep.simxGetObjectHandle(self.clientID, 'steer_joint', vrep.simx_opmode_oneshot_wait);
+        errorCode, self.motor_handle = vrep.simxGetObjectHandle(self.clientID, 'motor_joint', vrep.simx_opmode_oneshot_wait);
+        errorCode, self.fl_brake_handle = vrep.simxGetObjectHandle(self.clientID, 'fl_brake_joint', vrep.simx_opmode_oneshot_wait);
+        errorCode, self.fr_brake_handle = vrep.simxGetObjectHandle(self.clientID, 'fr_brake_joint', vrep.simx_opmode_oneshot_wait);
+        errorCode, self.bl_brake_handle = vrep.simxGetObjectHandle(self.clientID, 'bl_brake_joint', vrep.simx_opmode_oneshot_wait);
+        errorCode, self.br_brake_handle = vrep.simxGetObjectHandle(self.clientID, 'br_brake_joint', vrep.simx_opmode_oneshot_wait);
+        errorCode, self.camera_f_handle = vrep.simxGetObjectHandle(self.clientID, 'cam_f', vrep.simx_opmode_oneshot_wait);
+        
+        vrep.simxGetVisionSensorImage(self.clientID, self.camera_f_handle, 0, vrep.simx_opmode_streaming)
+        print('Received Handles...');
+
+        self.factor = 30/(2.68*3.6);
+        self.max_throttle = 19; # Kmph
+        self.max_reverse_throttle = -19; #Kmph
+        self.max_steer = 30; # Degrees
+
+        self.printFlag = printFlag;
+        
+        # Self test the camera
+        print('Setting up the camera system...');
+        self.lastFrame = None;
+        err = 0;
+        while(err != 1):
+            err, self.lastFrame = self.get_image();
+        print('Camera setup successful.')
+        
+
+    def set_throttle(self, target_speed):
+        if(target_speed &gt; self.max_throttle):
+            target_speed = self.max_throttle;
+        elif(target_speed &lt; self.max_reverse_throttle):
+            target_speed = self.max_reverse_throttle;
+        if(self.printFlag):
+            print('Setting throttle to', target_speed);
+        speed = target_speed * self.factor;
+        errorCode = vrep.simxSetJointTargetVelocity(self.clientID, self.motor_handle, speed, vrep.simx_opmode_streaming);
+
+    def set_steering(self, steer_pos):
+        if(abs(steer_pos) &gt; self.max_steer):
+            if(steer_pos &gt; 0):
+                steer_pos = self.max_steer;
+            else:
+                steer_pos = -self.max_steer;
+        if(self.printFlag):
+            print('Setting steering to', steer_pos);
+        # Convert to radians
+        steer_pos = np.deg2rad(steer_pos);        
+        errorCode = vrep.simxSetJointTargetPosition(self.clientID, self.steer_handle, steer_pos, vrep.simx_opmode_streaming);
+
+    def get_info(self):
+        # Check velocity
+        err, bl_wheel_vel = vrep.simxGetObjectFloatParameter(self.clientID, self.bl_brake_handle, vrep.sim_jointfloatparam_velocity, vrep.simx_opmode_streaming);
+        err, br_wheel_vel = vrep.simxGetObjectFloatParameter(self.clientID, self.br_brake_handle, vrep.sim_jointfloatparam_velocity, vrep.simx_opmode_streaming);
+        rear_wheel_velocity = ((bl_wheel_vel) + (br_wheel_vel))/2.0;
+        linear_velocity = rear_wheel_velocity * 0.09 * 3.6; # Kmph
+
+        throttle = linear_velocity;
+        steer_errorCode, steer_pos = vrep.simxGetJointPosition(self.clientID, self.steer_handle, vrep.simx_opmode_streaming);
+        if(self.printFlag):
+            print('Throttle:', throttle, 'Steering:', steer_pos);
+
+    def get_image(self):
+        err, resolution, image = vrep.simxGetVisionSensorImage(self.clientID, self.camera_f_handle, 0, vrep.simx_opmode_buffer);
+        if err == vrep.simx_return_ok:
+            img = np.array(image,dtype=np.uint8);
+            img.resize([resolution[1],resolution[0],3]);
+            self.lastFrame = imutils.rotate_bound(img, 90);
+            return 1, self.lastFrame;
+        elif err == vrep.simx_return_novalue_flag:
+            return 0, None;
+        else:
+            return err, None;
+
+vrep.simxFinish(-1) # just in case, close all opened connections
+clientID = vrep.simxStart('127.0.0.1',19999,True,True,5000,5) # Get the client ID
+res=vrep.simxLoadScene(clientID,"Y:\CoppeliaSim_4_Self_Driving_Car_Simulation\sdc.ttt",0,vrep.simx_opmode_blocking)
+x =vrep.simxStartSimulation(clientID,vrep.simx_opmode_oneshot_wait) 
+
+if clientID!=-1:  #check if client connection successful
+    print('Connected to remote API server')
+    
+else:
+    print('Connection not successful')
+    sys.exit('Could not connect')
+
+# Initialize car control object
+car = CarControl(clientID, printFlag = False);
+car.set_steering(20); # Degrees
+car.set_throttle(1);  # Kmph
+
+for i in range(150):
+    # Start time for image process
+    start = time.time();
+
+    err, img = car.get_image();
+
+    # End time for image process
+    end = time.time();
+
+    dt = end - start;
+    print('Frame took:', dt*1000.0, 'ms');
+    cv2.imshow('image',img);
+    cv2.waitKey(1); # in milliseconds
+    </pre>
+<p></p><br />RemoteAPI << <a href='RemoteAPI.html'>Previous</a> <a href='Webots.html'>Next</a> >> Webots</div>
         
     <!-- footer -->
       <div class="container">

@@ -279,6 +279,20 @@ def image():
 <p><a href="https://console.developers.google.com">https://console.developers.google.com</a></p>
 <p>Setup <span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation">OAuth 2.0 Client IDs </span></p>
 <p>Use <a href="https://github.com/authomatic/authomatic">https://github.com/authomatic/authomatic</a> to allow user login with Google or Github accounts.<span _ngcontent-lcy-c83="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-14" role="presentation"></span></p>
+<h4>Get your oauth_gm.txt file content:</h4>
+<ol>
+<li style="padding-left: 30px;">Login to your @gm account</li>
+<li style="padding-left: 30px;">Link to <a href="https://console.developers.google.com">https://console.developers.google.com</a></li>
+<li style="padding-left: 30px;">Accept the license and  create Google API project</li>
+<li style="padding-left: 30px;">Enable Google + Domain API</li>
+<li style="padding-left: 30px;">Under Google + Domain API credentials, press CONFIGURE CONSENT SCREEN button</li>
+<li style="padding-left: 30px;">Select Internal or External user type and add a new application name</li>
+<li style="padding-left: 30px;">Under API and Services, enter into Credentials page</li>
+<li style="padding-left: 30px;">Create "<span _ngcontent-ith-c126="" class="cfc-table-title ng-star-inserted" id="cfc-table-caption-1" role="presentation">OAuth 2.0 Client IDs" type credential for Web Application</span></li>
+<li style="padding-left: 30px;">Authorized JavaScript origins: <a href="https://localhost:8443">https://localhost:8443</a></li>
+<li style="padding-left: 30px;">Authorized redirect URIs: <a href="https://localhost:8443/login/google/">https://localhost:8443/login/google/</a></li>
+<li style="padding-left: 30px;">Save your Client ID and Client secret into oauth_gm.txt</li>
+</ol>
 <h4>URI settings for localhost:</h4>
 <p><img alt="" class="add_border" height="743" src="/images/console_developers_credentials.png" width="800"/></p><h2>Flask</h2>
 <h4><span>Python and Flask</span></h4>

@@ -2,9 +2,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-
-    <a href="/index">Home</a><br />
-    
+<a href="/menu">Menu</a><br />
     {# for loop to list menu #}
     {% for i in menuList %}
         <a href=" {{ i }} ">{{ i }}</a>

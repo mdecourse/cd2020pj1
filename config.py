@@ -3,8 +3,8 @@ from authomatic.providers import oauth2
 
 # read client_id and client_secret from safe place other than put into script
 # current setting only allow @gm user login
-keyFile = open('./../oauth_gm.txt', 'r')
-with open('./../oauth_gm.txt', 'r') as f:
+keyFile = open('./../oauth_scrum.txt', 'r')
+with open('./../oauth_scrum.txt', 'r') as f:
     key = f.read().splitlines()
 
 CONFIG = {

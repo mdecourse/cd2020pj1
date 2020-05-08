@@ -1,11 +1,14 @@
 import csv
 
 # read student list
-filename = 'E:/wcm2020/data/tmp/2020_spring_score/2a/j1a_list.txt'
+
+filename = 'E:/wcm2020/data/tmp/2020_spring_score/2a/2a_list.txt'
 with open(filename, encoding="utf-8") as f:
     content = f.readlines()
-student = [x.strip() for x in content] 
 #print(content)
+student = [x.strip() for x in content] 
+#print(student)
+
 
 # Timestamp, email, 修課名稱, url, score, desp, memo
 # 0, 1, 2, 3, 4, 5, 6
@@ -13,7 +16,8 @@ student = [x.strip() for x in content]
 all = {}
 with open('y:/2020midterm.csv', encoding="utf-8") as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
-    
+    #print(csv_reader)
+
     line_count = 0
     for row in csv_reader:
         if line_count == 0:
@@ -22,7 +26,7 @@ with open('y:/2020midterm.csv', encoding="utf-8") as csv_file:
         else:
             student_num = row[1].split("@")[0]
             #print(student_num)
-            student_score = row[3]
+            student_score = row[4]
             #print(student_score)
             try:
                 all.update({student_num: student_score})
@@ -32,9 +36,10 @@ with open('y:/2020midterm.csv', encoding="utf-8") as csv_file:
             #print(f'\t{row[4]}')
             #total += int(row[4])
             line_count += 1
-print(all)
-print(student)
-'''
+#print(all)
+#print(student)
+
+
 for i in student:
     
     #if i in all:
@@ -46,7 +51,6 @@ for i in student:
         print(i + "\t" + all[i])
     except:
         print(i + "\t60")
-'''
 
     #print(f'Processed {line_count} lines.')
     #print("平均=" + str(total/line_count))

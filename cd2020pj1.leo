@@ -6,6 +6,10 @@
 <preferences/>
 <find_panel_settings/>
 <vnodes>
+<v t="leo.20200511204814.1"><vh>@settings</vh>
+<v t="leo.20200511204814.2"><vh>@data qt-gui-plugin-style-sheet</vh></v>
+<v t="leo.20200511204814.3"><vh>@string initial_split_orientation = horizontal</vh></v>
+</v>
 <v t="yen.20200414103032.1"><vh>For Mac users</vh></v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="yen.20200418212333.1"><vh>Status</vh></v>
@@ -32,6 +36,9 @@
 <v t="yen.20200414150039.1"><vh>read client id and secret from file</vh></v>
 <v t="yen.20200414151417.1"><vh>generate secret id for Flask</vh></v>
 <v t="yen.20200414142052.1"><vh>Google logout and redirect</vh></v>
+</v>
+<v t="leo.20200511213501.1"><vh>upload file to Gdrive</vh>
+<v t="leo.20200511215142.1"><vh>ref</vh></v>
 </v>
 <v t="yen.20200423213714.1"><vh>Starting Flask</vh>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
@@ -71,9 +78,13 @@
 <v t="yen.20200423112001.1"><vh>alogin</vh></v>
 <v t="yen.20200414111938.1"><vh>login</vh></v>
 <v t="yen.20200420143358.1"><vh>logout</vh></v>
+<v t="leo.20200511205800.1"><vh>fileaxupload</vh></v>
+<v t="leo.20200511205824.1"><vh>fileuploadform</vh></v>
 </v>
 </v>
-<v t="amd.20151020232503.1"><vh>@path static</vh></v>
+<v t="amd.20151020232503.1"><vh>@path static</vh>
+<v t="leo.20200511211602.1"><vh>@edit axuploader.js</vh></v>
+</v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
 <v t="yen.20200419213847.1"><vh>@edit drawROC.html</vh></v>
 <v t="yen.20200420154412.1"><vh>@edit show_entries.html</vh></v>
@@ -557,6 +568,186 @@ def getNumList(total, eachGrp=10):
     # check final splits
     #print(splits);
     return splits;</t>
+<t tx="leo.20200511204814.1"></t>
+<t tx="leo.20200511204814.2">QSplitter::handle {
+    background-color: #CAE1FF; /* lightSteelBlue1 */
+}
+
+QStackedWidget {
+    /* background-color:lightpink; */
+    border-color: red;
+    padding: 0px;
+    /* border-width: 0px; */
+    /* background-color: yellow; */
+}
+
+QSplitter {
+    border-color: white;
+    background-color: white;
+    border-style: solid;
+}
+
+QTreeWidget {
+    /* These apply to the selected item, but not to editing items.*/
+    background-color: #ffffec; /* Leo's traditional tree color */
+    selection-color: black; /* was white */
+    selection-background-color: lightgrey;
+    /* font-family: SansSerif; */
+    /*font-family: DejaVu Sans Mono;*/
+    font-family:YaHei Mono;
+    /* 標題字型大小設定 */
+    font-size: 22px;
+    font-weight: normal; /* normal,bold,100,..,900 */
+    font-style: normal; /* normal, italic,oblique */
+ }
+
+/* Headline edit widgets */
+QTreeWidget QLineEdit {
+    background-color: cornsilk;
+    selection-color: white;
+    selection-background-color: blue;
+    /*font-family: DejaVu Sans Mono;*/    
+    font-family:YaHei Mono;
+    /* 沒有特別對應字型大小 */
+    font-size: 22px;
+    font-weight: normal; /* normal,bold,100,..,900 */
+    font-style: normal; /* normal, italic,oblique */
+}
+
+/* The log panes */
+QTextEdit {
+    background-color: #f2fdff;
+    selection-color: red;
+    selection-background-color: blue;
+    /* font-family: Courier New; */
+    font-family:YaHei Mono;
+    /* log font 大小 */
+    font-size: 22px;
+    font-weight: normal; /* normal,bold,100,..,900 */
+    font-style: normal; /* normal, italic,oblique */
+}
+
+/* The body pane */
+QTextEdit#richTextEdit {
+    background-color: #fdf5f5; /* A kind of pink. */
+    selection-color: white;
+    selection-background-color: red;
+    /*font-family: DejaVu Sans Mono;*/
+    /* font-family: Courier New; */
+    font-family:YaHei Mono;
+    /* 內文字型大小 */
+    font-size: 22px;
+    font-weight: normal; /* normal,bold,100,..,900 */
+    font-style: normal; /* normal,italic,oblique */
+}
+
+QLabel {
+    font-family:YaHei Mono;
+    /* 下方的 Minibuffer 標題字型大小 */
+    font-size: 22px;
+    font-weight: normal; /* normal,bold,100,..,900 */
+    font-style: normal; /* normal,italic,oblique */
+}
+
+/* Editor labels */
+QLineEdit#editorLabel {
+    background-color: #ffffec;
+    font-family:YaHei Mono;
+    /* 沒有直接對應字型大小 */
+    font-size: 22px;
+    font-weight: normal; /* normal,bold,100,..,900 */
+    font-style: normal; /* normal,italic,oblique */
+    border: 2px;
+    margin: 2px;
+}</t>
+<t tx="leo.20200511204814.3">horizontal: body pane to the left
+vertical: body pane on the botton</t>
+<t tx="leo.20200511205800.1">@login_required
+@app.route('/fileaxupload', methods=['POST'])
+# ajax jquery chunked file upload for flask
+def fileaxupload():
+    # need to consider if the uploaded filename already existed.
+    # right now all existed files will be replaced with the new files
+    filename = request.args.get("ax-file-name")
+    flag = request.args.get("start")
+    if flag == "0":
+        file = open(_curdir + "/downloads/" + filename, "wb")
+    else:
+        file = open(_curdir + "/downloads/" + filename, "ab")
+    file.write(request.stream.read())
+    file.close()
+    return "files uploaded!"
+
+
+</t>
+<t tx="leo.20200511205824.1">@login_required
+@app.route('/fileuploadform', defaults={'edit':1})
+@app.route('/fileuploadform/&lt;path:edit&gt;')
+def fileuploadform(edit):
+    return "&lt;h1&gt;file upload&lt;/h1&gt;" + \
+                 '''&lt;script src="/static/jquery.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script src="/static/axuploader.js" type="text/javascript"&gt;&lt;/script&gt;
+&lt;script&gt;
+$(document).ready(function(){
+$('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
+finish:function(x,files)
+    {
+        alert('All files have been uploaded: '+files);
+    },
+enable:true,
+remotePath:function(){
+return 'downloads/';
+}
+});
+});
+&lt;/script&gt;
+&lt;div class="prova"&gt;&lt;/div&gt;
+&lt;input type="button" onclick="$('.prova').axuploader('disable')" value="asd" /&gt;
+&lt;input type="button" onclick="$('.prova').axuploader('enable')" value="ok" /&gt;
+&lt;/section&gt;&lt;/body&gt;&lt;/html&gt;
+'''
+
+
+</t>
+<t tx="leo.20200511213501.1"># pip install pydrive
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+ 
+gauth = GoogleAuth()
+gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
+drive = GoogleDrive(gauth)
+ 
+ 
+# View all folders and file in your Google Drive
+fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+for file in fileList:
+  print('Title: %s, ID: %s' % (file['title'], file['id']))
+  # Get the folder ID that you want
+  if(file['title'] == "uploaded"):
+      fileID = file['id']
+ 
+file1 = drive.CreateFile({"mimeType": "application/pdf", "parents": [{"kind": "drive#fileLink", "id": fileID}]})
+file1.SetContentFile("file_to_upload.pdf")
+file1.Upload() # Upload the file.
+print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))</t>
+<t tx="leo.20200511215142.1">https://github.com/gsuitedevs/PyDrive/issues/115
+
+https://github.com/richiverse/gdrive-lambda/blob/master/app.py
+
+For example, you might want to integrate your existing website with Drive API. In that case, you can customize authentication flow as follwing:
+
+1. Get authentication Url from GetAuthUrl().
+2. Ask users to visit the authentication Url and grant access to your application. Retrieve authentication code manually by user or automatically by building your own oauth2callback.
+3. Call Auth(code) with the authentication code you retrieved from step 2.
+
+Your settings.yaml will work for your customized authentication flow, too.
+	
+from pydrive.auth import GoogleAuth
+
+gauth = GoogleAuth()
+auth_url = gauth.GetAuthUrl() # Create authentication url user needs to visit
+code = AskUserToVisitLinkAndGiveCode(auth_url) # Your customized authentication flow
+gauth.Auth(code) # Authorize and build service from the code</t>
 <t tx="yen.20200414102935.1">http://peterhudec.github.io/authomatic/</t>
 <t tx="yen.20200414102935.2">config.py
 

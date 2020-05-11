@@ -363,6 +363,51 @@ def logout():
     session.pop('user', None)
     flash('Logged out!')
     return redirect(url_for('index'))
+@login_required
+@app.route('/fileaxupload', methods=['POST'])
+# ajax jquery chunked file upload for flask
+def fileaxupload():
+    # need to consider if the uploaded filename already existed.
+    # right now all existed files will be replaced with the new files
+    filename = request.args.get("ax-file-name")
+    flag = request.args.get("start")
+    if flag == "0":
+        file = open(_curdir + "/downloads/" + filename, "wb")
+    else:
+        file = open(_curdir + "/downloads/" + filename, "ab")
+    file.write(request.stream.read())
+    file.close()
+    return "files uploaded!"
+
+
+@login_required
+@app.route('/fileuploadform', defaults={'edit':1})
+@app.route('/fileuploadform/<path:edit>')
+def fileuploadform(edit):
+    return "<h1>file upload</h1>" + \
+                 '''<script src="/static/jquery.js" type="text/javascript"></script>
+<script src="/static/axuploader.js" type="text/javascript"></script>
+<script>
+$(document).ready(function(){
+$('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
+finish:function(x,files)
+    {
+        alert('All files have been uploaded: '+files);
+    },
+enable:true,
+remotePath:function(){
+return 'downloads/';
+}
+});
+});
+</script>
+<div class="prova"></div>
+<input type="button" onclick="$('.prova').axuploader('disable')" value="asd" />
+<input type="button" onclick="$('.prova').axuploader('enable')" value="ok" />
+</section></body></html>
+'''
+
+
 
 if __name__ == "__main__":
     app.run()

@@ -217,7 +217,9 @@ print('Program ended')</pre>
 <p style="padding-left: 30px;">NAT 代表 Network Address Translation, etwork Address Translation, 在 Virtualbox 中的虛擬主機網路設為 NAT 時, 除了虛擬主機本身可以透過 Host 連外網路上網外, 還可以透過虛擬主機 Network 中動態設定 Port Forwarding, 讓 Windows Host 可以作為 Client 端. 以所設定的埠號對應連線.</p>
 <p style="padding-left: 30px;">NAT 常用的 Port Forwarding 為 SSH 22, 與開發 CMSiMDE 套件常用的 7443, 8443, 9443 與 8444 等.</p>
 <p>Host only</p>
-<p>Bridged</p><h3>OpenCV</h3>
+<p style="padding-left: 30px;">主要用來建立 Windows 網路內部的伺服器主機, 其服務對象只限於 Windows Host</p>
+<p>Bridged</p>
+<p style="padding-left: 30px;">主要用來建立能夠與 Windows 網路位階相同的外部伺服器主機, 其服務對象可以擴及 Windows Host 的網路之外的區域網路或廣域網路上的 Client 端.</p><h3>OpenCV</h3>
 <p><a href="https://stackoverflow.com/questions/38030263/how-to-send-an-image-from-flask-server-to-javascript-display-on-frontend/40307539#40307539">https://stackoverflow.com/questions/38030263/how-to-send-an-image-from-flask-server-to-javascript-display-on-frontend/40307539#40307539</a></p>
 <p><a href="https://stackoverflow.com/questions/46373163/passing-a-cv2-frame-from-view-to-template">https://stackoverflow.com/questions/46373163/passing-a-cv2-frame-from-view-to-template</a> </p>
 <pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">@app.route('/image')
@@ -268,6 +270,9 @@ def image():
 <h4 style="padding-left: 30px;"><span>2b</span></h4>
 <p style="padding-left: 60px;"><span>Oauth2 client 連線設定流程說明:</span></p>
 <p style="padding-left: 60px;"><a href="https://drive.google.com/file/d/1G4MzXUIbNRK7z2XdjtxXzhX51zHHwq85/view?usp=sharing">https://drive.google.com/file/d/1G4MzXUIbNRK7z2XdjtxXzhX51zHHwq85/view?usp=sharing</a> <span>(登入 @gm 帳號後可以在線觀看)</span></p>
+<h4><span>W11</span></h4>
+<p style="padding-left: 30px;"><span><a href="https://drive.google.com/file/d/1WZH3Xrogi3xUStrHYSL6AcTWzHCWt-gA/view?usp=sharing">Virtualbox 虛擬主機 NAT 設定與 X-win 連線</a> (登入 @gm 後可以在線觀看)</span></p>
+<p style="padding-left: 30px;"><span><a href="https://drive.google.com/open?id=1S9gTVrscJAvGmXz0UxVKbWkAqEXkmO9d">Ubuntu 20.04 上的 CoppeliaSim 四輪車與 Windows 上的 Python Remote API 在 X-Windows 介面下協同控制影片</a> (登入 @gm 後可以在線觀看)</span></p>
 <h4><span>期中自評成績處理程式:</span></h4>
 <pre class="brush:py;auto-links:false;toolbar:false" contenteditable="false">import csv
 

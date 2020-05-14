@@ -160,9 +160,12 @@ img.add_border {
 <p>指令更改虛擬硬碟檔案的 UUID, 才能配置在同一 Virtualbox 系統下.</p>
 <h4>虛擬主機的網路設定</h4>
 <p>NAT</p>
+<p style="padding-left: 30px;">NAT 代表 Network Address Translation, etwork Address Translation, 在 Virtualbox 中的虛擬主機網路設為 NAT 時, 除了虛擬主機本身可以透過 Host 連外網路上網外, 還可以透過虛擬主機 Network 中動態設定 Port Forwarding, 讓 Windows Host 可以作為 Client 端. 以所設定的埠號對應連線.</p>
+<p style="padding-left: 30px;">NAT 常用的 Port Forwarding 為 SSH 22, 與開發 CMSiMDE 套件常用的 7443, 8443, 9443 與 8444 等.</p>
 <p>Host only</p>
+<p style="padding-left: 30px;">主要用來建立 Windows 網路內部的伺服器主機, 其服務對象只限於 Windows Host</p>
 <p>Bridged</p>
-<br />Firewall << <a href='Firewall.html'>Previous</a> <a href='OpenCV.html'>Next</a> >> OpenCV</div>
+<p style="padding-left: 30px;">主要用來建立能夠與 Windows 網路位階相同的外部伺服器主機, 其服務對象可以擴及 Windows Host 的網路之外的區域網路或廣域網路上的 Client 端.</p><br />Firewall << <a href='Firewall.html'>Previous</a> <a href='OpenCV.html'>Next</a> >> OpenCV</div>
         
     <!-- footer -->
       <div class="container">

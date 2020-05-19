@@ -39,7 +39,10 @@
 </v>
 <v t="leo.20200511213501.1"><vh>upload file to Gdrive</vh>
 <v t="leo.20200511215142.1"><vh>ref</vh></v>
-<v t="yen.20200519095851.1"><vh>javascript</vh></v>
+<v t="yen.20200519095851.1"><vh>javascript</vh>
+<v t="yen.20200519142351.1"><vh>ex1</vh></v>
+<v t="yen.20200519142439.1"><vh>ex2</vh></v>
+</v>
 </v>
 <v t="yen.20200423213714.1"><vh>Starting Flask</vh>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
@@ -1186,7 +1189,7 @@ def logout():
 <t tx="yen.20200420144030.1">@app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform"]
+    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list"]
     return render_template("menu.html", menuList=menuList)</t>
 <t tx="yen.20200420153541.1"># set default value of the variables accordingly
 @app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
@@ -1298,7 +1301,13 @@ if __name__ == "__main__":
 <t tx="yen.20200519095504.1">https://github.com/blueimp/jQuery-File-Upload</t>
 <t tx="yen.20200519095851.1">https://gist.github.com/tanaikech/bd53b366aedef70e35a35f449c51eced
 
-https://gist.github.com/tanaikech/2f16f467c94612dc83920a3158614d95</t>
+https://gist.github.com/tanaikech/2f16f467c94612dc83920a3158614d95
+
+https://github.com/tanaikech/ResumableUploadForGoogleDrive_js
+
+https://github.com/tanaikech/AsynchronousResumableUploadForGoogleDrive
+
+https://gist.github.com/Max-Makhrov/a70ca1a5a5fbf32b7ef97c5cd1888510</t>
 <t tx="yen.20200519104425.1">https://api.dart.dev/stable/2.8.2/dart-html/HttpRequest-class.html</t>
 <t tx="yen.20200519105132.1">@app.route('/download/', methods=['GET'])
 def download():
@@ -1506,8 +1515,9 @@ def delete_file():
 
     """Delete user uploaded files
     """
+    # use request.form.getlist() allow multiple select
+    filename = request.form.getlist('filename')
 
-    filename = request.form['filename']
     if filename is None:
         outstring = "no file selected!"
         return "&lt;h1&gt;Delete Error&lt;/h1&gt;" + \
@@ -1538,7 +1548,8 @@ def doDelete():
     """
 
     # delete files
-    filename = request.form['filename']
+    # allow multiple files selection
+    filename = request.form.getlist('filename')
     outstring = "all these files will be deleted:&lt;br /&gt;&lt;br /&gt;"
     # only select one file
     if isinstance(filename, str):
@@ -1562,5 +1573,48 @@ def doDelete():
 
 
 </t>
+<t tx="yen.20200519142351.1">var fileContent = 'sample text'; // As a sample, upload a text file.
+var file = new Blob([fileContent], {type: 'text/plain'});
+var metadata = {
+    'name': 'sampleName', // Filename at Google Drive
+    'mimeType': 'text/plain', // mimeType at Google Drive
+    'parents': ['### folder ID ###'], // Folder ID at Google Drive
+};
+
+var accessToken = gapi.auth.getToken().access_token; // Here gapi is used for retrieving the access token.
+var form = new FormData();
+form.append('metadata', new Blob([JSON.stringify(metadata)], {type: 'application/json'}));
+form.append('file', file);
+
+var xhr = new XMLHttpRequest();
+xhr.open('post', 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&amp;fields=id');
+xhr.setRequestHeader('Authorization', 'Bearer ' + accessToken);
+xhr.responseType = 'json';
+xhr.onload = () =&gt; {
+    console.log(xhr.response.id); // Retrieve uploaded file ID.
+};
+xhr.send(form);</t>
+<t tx="yen.20200519142439.1">var fileContent = 'sample text'; // As a sample, upload a text file.
+var file = new Blob([fileContent], {type: 'text/plain'});
+var metadata = {
+    'name': 'sampleName', // Filename at Google Drive
+    'mimeType': 'text/plain', // mimeType at Google Drive
+    'parents': ['### folder ID ###'], // Folder ID at Google Drive
+};
+
+var accessToken = gapi.auth.getToken().access_token; // Here gapi is used for retrieving the access token.
+var form = new FormData();
+form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+form.append('file', file);
+
+fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&amp;fields=id', {
+    method: 'POST',
+    headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+    body: form,
+}).then((res) =&gt; {
+    return res.json();
+}).then(function(val) {
+    console.log(val);
+});</t>
 </tnodes>
 </leo_file>

@@ -92,7 +92,7 @@ def drawROC():
 @app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform"]
+    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list"]
     return render_template("menu.html", menuList=menuList)
 # setup static directory
 @app.route('/static/<path:path>')
@@ -610,8 +610,9 @@ def delete_file():
 
     """Delete user uploaded files
     """
+    # use request.form.getlist() allow multiple select
+    filename = request.form.getlist('filename')
 
-    filename = request.form['filename']
     if filename is None:
         outstring = "no file selected!"
         return "<h1>Delete Error</h1>" + \
@@ -641,7 +642,8 @@ def doDelete():
     """
 
     # delete files
-    filename = request.form['filename']
+    # allow multiple files selection
+    filename = request.form.getlist('filename')
     outstring = "all these files will be deleted:<br /><br />"
     # only select one file
     if isinstance(filename, str):

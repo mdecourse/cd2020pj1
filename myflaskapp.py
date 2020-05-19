@@ -33,6 +33,7 @@ authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_error
 
 # 確定程式檔案所在目錄, 在 Windows 有最後的反斜線
 _curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
+download_dir = _curdir + "/downloads/"
 
 app = Flask(__name__)
 
@@ -91,7 +92,7 @@ def drawROC():
 @app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping", "show_entries"]
+    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform"]
     return render_template("menu.html", menuList=menuList)
 # setup static directory
 @app.route('/static/<path:path>')
@@ -406,6 +407,261 @@ return 'downloads/';
 <input type="button" onclick="$('.prova').axuploader('enable')" value="ok" />
 </section></body></html>
 '''
+
+
+@app.route('/download/', methods=['GET'])
+def download():
+
+    """Download file using URL
+    """
+
+    filename = request.args.get('filename')
+    type = request.args.get('type')
+    if type == "files":
+        return send_from_directory(download_dir, filename=filename)
+    else:
+    # for image files
+        return send_from_directory(image_dir, filename=filename)
+    
+
+@app.route('/downloads/<path:path>')
+def downloads(path):
+
+    """Send files in downloads directory
+    """
+
+    return send_from_directory(_curdir+"/downloads/", path)
+
+@app.route('/download_list', methods=['GET'])
+@login_required
+def download_list():
+
+    """List files in downloads directory
+    """
+
+    if not request.args.get('edit'):
+        edit= 1
+    else:
+        edit = request.args.get('edit')
+    if not request.args.get('page'):
+        page = 1
+    else:
+        page = request.args.get('page')
+    if not request.args.get('item_per_page'):
+        item_per_page = 10
+    else:
+        item_per_page = request.args.get('item_per_page')
+    if not request.args.get('keyword'):
+        keyword = ""
+    else:
+        keyword = request.args.get('keyword')
+        session['download_keyword'] = keyword
+
+    files = os.listdir(download_dir)
+    if keyword != "":
+        files = [elem for elem in files if str(keyword) in elem]
+    files.sort()
+    total_rows = len(files)
+    totalpage = math.ceil(total_rows/int(item_per_page))
+    starti = int(item_per_page) * (int(page) - 1) + 1
+    endi = starti + int(item_per_page) - 1
+    outstring = "<form method='post' action='delete_file'>"
+    notlast = False
+    if total_rows > 0:
+        outstring += "<br />"
+        if (int(page) * int(item_per_page)) < total_rows:
+            notlast = True
+        if int(page) > 1:
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=1&amp;item_per_page=" + str(item_per_page) + \
+                                "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'><<</a> "
+            page_num = int(page) - 1
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=" + str(page_num) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Previous</a> "
+
+        span = 10
+
+        for index in range(int(page)-span, int(page)+span):
+            if index>= 0 and index< totalpage:
+                page_now = index + 1 
+                if page_now == int(page):
+                    outstring += "<font size='+1' color='red'>" + str(page) + " </font>"
+                else:
+                    outstring += "<a href='"
+                    outstring += "download_list?&amp;page=" + str(page_now) + "&amp;item_per_page=" + \
+                                        str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+                    outstring += "'>"+str(page_now) + "</a> "
+
+        if notlast == True:
+            nextpage = int(page) + 1
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(nextpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Next</a>"
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(totalpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>>></a><br /><br />"
+
+        if (int(page) * int(item_per_page)) < total_rows:
+            notlast = True
+            outstring += downloadlist_access_list(files, starti, endi) + "<br />"
+        else:
+            outstring += "<br /><br />"
+            outstring += downloadlist_access_list(files, starti, total_rows) + "<br />"
+
+        if int(page) > 1:
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=1&amp;item_per_page=" + str(item_per_page) + \
+                                "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'><<</a> "
+            page_num = int(page) - 1
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=" + str(page_num) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Previous</a> "
+
+        span = 10
+
+        for index in range(int(page)-span, int(page)+span):
+        #for ($j=$page-$range;$j<$page+$range;$j++)
+            if index >=0 and index < totalpage:
+                page_now = index + 1
+                if page_now == int(page):
+                    outstring += "<font size='+1' color='red'>" + str(page)+" </font>"
+                else:
+                    outstring += "<a href='"
+                    outstring += "download_list?&amp;page=" + str(page_now) + \
+                                        "&amp;item_per_page=" + str(item_per_page) + \
+                                        "&amp;keyword=" + str(session.get('download_keyword'))
+                    outstring += "'>" + str(page_now)+"</a> "
+
+        if notlast == True:
+            nextpage = int(page) + 1
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(nextpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Next</a>"
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(totalpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>>></a>"
+    else:
+        outstring += "no data!"
+    outstring += "<br /><br /><input type='submit' value='delete'><input type='reset' value='reset'></form>"
+
+
+    return "<h1>Download List</h1>" + outstring + "<br/><br /></body></html>"
+
+
+def downloadlist_access_list(files, starti, endi):
+    
+    """List files function for download_list
+    """
+    
+    # different extension files, associated links were provided
+    # popup window to view images, video or STL files, other files can be downloaded directly
+    # files are all the data to list, from starti to endi
+    # add file size
+    outstring = ""
+    for index in range(int(starti)-1, int(endi)):
+        fileName, fileExtension = os.path.splitext(files[index])
+        fileExtension = fileExtension.lower()
+        fileSize = sizeof_fmt(os.path.getsize(download_dir+"/"+files[index]))
+        # images files
+        if fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".gif":
+            outstring += '<input type="checkbox" name="filename" value="' + \
+                              files[index] + '"><a href="javascript:;" onClick="window.open(\'/images/' +  \
+                              files[index] + '\',\'images\', \'catalogmode\',\'scrollbars\')">' + \
+                              files[index] + '</a> (' + str(fileSize) + ')<br />'
+        # stl files
+        elif fileExtension == ".stl":
+            outstring += '<input type="checkbox" name="filename" value="' + \
+                              files[index] + '"><a href="javascript:;" onClick="window.open(\'/static/viewstl.html?src=' + '/downloads/' + \
+                              files[index] + '\',\'images\', \'catalogmode\',\'scrollbars\')">' + \
+                              files[index] + '</a> (' + str(fileSize) + ')<br />'
+        # flv files
+        elif fileExtension == ".flv":
+            outstring += '<input type="checkbox" name="filename" value="' + \
+                              files[index] + '"><a href="javascript:;" onClick="window.open(\'/flvplayer?filepath=/downloads/' + \
+            files[index] + '\',\'images\', \'catalogmode\',\'scrollbars\')">' + files[index] + '</a> (' + str(fileSize) + ')<br />'
+        # direct download files
+        else:
+            outstring += "<input type='checkbox' name='filename' value='" + files[index] + \
+                              "'><a href='./../downloads/" + files[index] + "'>" + files[index] + \
+                              "</a> (" + str(fileSize) + ")<br />"
+    return outstring
+
+
+# downloads 方法主要將位於 downloads 目錄下的檔案送回瀏覽器
+def sizeof_fmt(num):
+    """size formate"""
+    for x in ['bytes','KB','MB','GB']:
+        if num < 1024.0:
+            return "%3.1f%s" % (num, x)
+        num /= 1024.0
+    return "%3.1f%s" % (num, 'TB')
+@app.route('/delete_file', methods=['POST'])
+@login_required
+def delete_file():
+
+    """Delete user uploaded files
+    """
+
+    filename = request.form['filename']
+    if filename is None:
+        outstring = "no file selected!"
+        return "<h1>Delete Error</h1>" + \
+                   outstring + "<br/><br /></body></html>"
+    outstring = "delete all these files?<br /><br />"
+    outstring += "<form method='post' action='doDelete'>"
+    # only one file is selected
+    if isinstance(filename, str):
+        outstring += filename + "<input type='hidden' name='filename' value='" + \
+                            filename + "'><br />"
+    else:
+        # multiple files selected
+        for index in range(len(filename)):
+            outstring += filename[index] + "<input type='hidden' name='filename' value='" + \
+                                filename[index]+"'><br />"
+    outstring += "<br /><input type='submit' value='delete'></form>"
+
+    return "<h1>Download List</h1>" + \
+               outstring + "<br/><br /></body></html>"
+
+
+@app.route('/doDelete', methods=['POST'])
+@login_required
+def doDelete():
+
+    """Action to delete user uploaded files
+    """
+
+    # delete files
+    filename = request.form['filename']
+    outstring = "all these files will be deleted:<br /><br />"
+    # only select one file
+    if isinstance(filename, str):
+        try:
+            os.remove(download_dir + "/" + filename)
+            outstring += filename + " deleted!"
+        except:
+            outstring += filename + "Error, can not delete files!<br />"
+    else:
+        # multiple files selected
+        for index in range(len(filename)):
+            try:
+                os.remove(download_dir + "/" + filename[index])
+                outstring += filename[index] + " deleted!<br />"
+            except:
+                outstring += filename[index] + "Error, can not delete files!<br />"
+
+
+    return "<h1>Download List</h1>" + \
+               outstring + "<br/><br /></body></html>"
 
 
 

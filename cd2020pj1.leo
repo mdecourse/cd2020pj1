@@ -53,6 +53,7 @@
 <v t="yen.20200519095504.1"><vh>file uploader</vh></v>
 <v t="yen.20200519104425.1"><vh>Dart ajax</vh></v>
 </v>
+<v t="yen.20200519160558.1"><vh>PyGithub</vh></v>
 <v t="yen.20200419155906.1"><vh>Database</vh>
 <v t="yen.20200419155956.1"><vh>@edit schema.sql</vh></v>
 <v t="yen.20200419160014.1"><vh>@button create db</vh></v>
@@ -95,9 +96,13 @@
 <v t="yen.20200519110307.1"><vh>sizeof_fmt</vh></v>
 <v t="yen.20200519110530.1"><vh>delete_file</vh></v>
 <v t="yen.20200519110824.1"><vh>doDelete</vh></v>
+<v t="yen.20200523231031.1"><vh>saveToDB</vh></v>
 </v>
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh>
+<v t="yen.20200523200833.1"><vh>有關檔案上傳程式</vh></v>
+<v t="yen.20200523203310.1"><vh>變數</vh></v>
+<v t="yen.20200523205244.1"><vh>AJAX</vh></v>
 <v t="leo.20200511211602.1"><vh>@edit axuploader.js</vh></v>
 </v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
@@ -704,11 +709,32 @@ def fileuploadform(edit):
                  '''&lt;script src="/static/jquery.js" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script src="/static/axuploader.js" type="text/javascript"&gt;&lt;/script&gt;
 &lt;script&gt;
+// 用於將各上傳檔案名稱存入資料庫中, 檔案刪除時從資料庫中移除
+function sendToServer(files){
+    var req = new XMLHttpRequest();
+    var result = document.getElementById('result');
+    req.onreadystatechange = function()
+    {
+      if(this.readyState == 4 &amp;&amp; this.status == 200) {
+        result.innerHTML = this.responseText;
+      } else {
+        result.innerHTML = "working...";
+      }
+    }
+    
+    req.open('POST', '/saveToDB', true);
+    req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    req.send("files=" +  files);
+}
+
 $(document).ready(function(){
 $('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
 finish:function(x,files)
     {
+        // 這裡要利用 sendToServer 函式將 files 數列傳到 server, 再由 python 納入資料庫
+        sendToServer(files);
         alert('All files have been uploaded: '+files);
+
     },
 enable:true,
 remotePath:function(){
@@ -1616,5 +1642,70 @@ fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&amp
 }).then(function(val) {
     console.log(val);
 });</t>
+<t tx="yen.20200519160558.1">https://github.com/PyGithub/PyGithub
+
+Github REST API v3: https://developer.github.com/v3/repos/collaborators/
+
+u = g.get_user()
+
+repo = u.create_repo(name=repoName, description=description, auto_init=True)
+
+repo.add_to_collaborators('usename', permission='push')
+
+# try to see if add_to_collaborators ('email_address', permission='push')
+# permission="admin" 讓使用者具管理權
+# permission="push" 讓使用者有 push 權</t>
+<t tx="yen.20200523200833.1">https://stackoverflow.com/questions/2937227/what-does-function-jquery-mean
+
+IIFE
+
+https://developer.mozilla.org/en-US/docs/Glossary/IIFE
+
+http://benalman.com/news/2010/11/immediately-invoked-function-expression/
+
+(function($) {})(jQuery);
+
+----
+
+// an anonymous function
+  
+(function () { console.log('hello') });
+
+// a self invoked anonymous function
+
+(function () { console.log('hello') })();
+  
+// a self invoked anonymous function with a parameter called "$"
+  
+var jQuery = 'I\'m not jQuery.';
+
+(function ($) { console.log($) })(jQuery);
+
+----
+
+This structure (function() {})(); is called IIFE (Immediately Invoked Function Expression), it will be executed immediately, when the interpreter will reach this line. So when you're writing these rows:
+
+(function($) {
+  // do something
+})(jQuery);
+
+this means, that the interpreter will invoke the function immediately, and will pass jQuery as a parameter, which will be used inside the function as $.</t>
+<t tx="yen.20200523203310.1">fileList 列出使用者所選擇要上傳的檔案
+
+fileArray 應該就是上傳檔名矩陣</t>
+<t tx="yen.20200523205244.1">https://developer.mozilla.org/en-US/docs/Web/Guide/AJAX
+
+https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest
+
+To send an HTTP request, create an XMLHttpRequest object, open a URL, and send the request. After the transaction completes, the object will contain useful information such as the response body and the HTTP status of the result.</t>
+<t tx="yen.20200523231031.1">@app.route('/saveToDB' , methods=['POST'])
+def saveToDB():
+        if request.method == "POST":
+            files = request.form["files"]
+            # split files string
+            files = files.split(",")
+        with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
+            file.write(files[0])
+        return "files save to database"</t>
 </tnodes>
 </leo_file>

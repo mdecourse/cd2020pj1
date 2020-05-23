@@ -389,11 +389,32 @@ def fileuploadform(edit):
                  '''<script src="/static/jquery.js" type="text/javascript"></script>
 <script src="/static/axuploader.js" type="text/javascript"></script>
 <script>
+// 用於將各上傳檔案名稱存入資料庫中, 檔案刪除時從資料庫中移除
+function sendToServer(files){
+    var req = new XMLHttpRequest();
+    var result = document.getElementById('result');
+    req.onreadystatechange = function()
+    {
+      if(this.readyState == 4 && this.status == 200) {
+        result.innerHTML = this.responseText;
+      } else {
+        result.innerHTML = "working...";
+      }
+    }
+    
+    req.open('POST', '/saveToDB', true);
+    req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
+    req.send("files=" +  files);
+}
+
 $(document).ready(function(){
 $('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
 finish:function(x,files)
     {
+        // 這裡要利用 sendToServer 函式將 files 數列傳到 server, 再由 python 納入資料庫
+        sendToServer(files);
         alert('All files have been uploaded: '+files);
+
     },
 enable:true,
 remotePath:function(){
@@ -666,6 +687,15 @@ def doDelete():
                outstring + "<br/><br /></body></html>"
 
 
+@app.route('/saveToDB' , methods=['POST'])
+def saveToDB():
+        if request.method == "POST":
+            files = request.form["files"]
+            # split files string
+            files = files.split(",")
+        with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
+            file.write(files[0])
+        return "files save to database"
 
 if __name__ == "__main__":
     app.run()

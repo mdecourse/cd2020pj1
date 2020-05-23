@@ -34,7 +34,7 @@
         	      'GIFprogress':'',
         	      'enable':true,
         	      'chunkSize':1024*1024//default 1Mb
-    	        };
+    	             };
 
             var _this=this;
             if(options)	$.extend(settings,options);

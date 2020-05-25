@@ -3,6 +3,7 @@ from pydrive.drive import GoogleDrive
 
 gauth = GoogleAuth()
 gauth.LoadClientConfigFile("./../client_secrets.json")
+#gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
 drive = GoogleDrive(gauth)
 
 '''
@@ -28,3 +29,5 @@ file1.SetContentFile(filePath + fileName)
 file1.Upload() # Upload the file.
 #print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))   
 print("upload fileID:" + str(file1['id']))
+file2 = drive.CreateFile({'id': file1['id']})
+file2.GetContentFile('./test/downloaded_ModernC.pdf') # Download file as 'downloaded_ModernC.pdf under directory test'.

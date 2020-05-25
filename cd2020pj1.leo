@@ -1729,6 +1729,8 @@ file1.SetContentFile(filePath + fileName)
 file1.Upload() # Upload the file.
 #print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))   
 print("upload fileID:" + str(file1['id']))
+file2 = drive.CreateFile({'id': file1['id']})
+file2.GetContentFile('./test/downloaded_ModernC.pdf') # Download file as 'downloaded_ModernC.pdf under directory test'.
 </t>
 </tnodes>
 </leo_file>

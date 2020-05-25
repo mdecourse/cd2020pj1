@@ -28,6 +28,13 @@ from contextlib import closing
 # for add_entry
 import datetime
 
+# for GDrive upload
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+# for get mimeType of uploaded file
+import mimetypes
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
@@ -245,7 +252,7 @@ def randomGrouping():
 
         gth = gth + 1
 
-    print(output)
+    #print(output)
     
     # add grouping result into grouping table of /db/database.db
     date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
@@ -653,22 +660,78 @@ def doDelete():
 
 
 @app.route('/saveToDB' , methods=['POST'])
+@login_required
 def saveToDB():
-    
-    '''
-    axuploader.js 將檔案上傳後, 將上傳檔案名稱數列, 以 post 回傳到 Flask server.
+
+    """axuploader.js 將檔案上傳後, 將上傳檔案名稱數列, 以 post 回傳到 Flask server.
     
     截至這裡, 表示檔案已經從 client 上傳至 server, 可以再設法通過認證, 將 server 上的檔案上傳到對應的 Google Drive, 並且在上傳後的 GDrive 目錄, 設定特定擷取權限 (例如: 只允許 @gm 用戶下載.
     以下則可將 server 上傳後的擷取目錄與 GDrive 各檔案 ID 存入資料庫, 而檔案擷取則分為 server 擷取與 GDrive 擷取等兩種 url 連結設定
-    '''
-    
+    """
+
     if request.method == "POST":
         files = request.form["files"]
         # split files string
         files = files.split(",")
-    with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
-        file.write(files[0])
-    return "files save to database"
+        # files 為上傳檔案名稱所組成的數列
+        for i in range(len(files)):
+            # 逐一將已經存在 server downloads 目錄的檔案, 上傳到 GDrive uploaded 目錄
+            fileName = files[i]
+            fileLocation = _curdir + "/downloads/" + fileName
+            mimeType = mimetypes.MimeTypes().guess_type(fileLocation)[0]
+            gdriveID = uploadToGdrive(fileName, mimeType)
+            fileSize = str(round(os.path.getsize(fileLocation)/(1024*1024.0), 2)) + " MB"
+            date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
+            user = session.get("user")
+            print(user + "|" + str(fileSize) + "|" + str(mimeType) + "|"  + gdriveID)
+            # 逐一將上傳檔案名稱存入資料庫, 同時存入mimeType, fileSize 與 gdriveID
+            # 資料庫欄位
+            #g.db.execute('insert into grouping (user , date, fileName, mimeType, fileSize, memo) values (?, ?, ?, ?, ?, ?)',(user, date, fileName, mimeType, fileSize, "memo"))
+            #g.db.commit()
+            #flash('已經新增一筆 upload 資料!')
+    return "Uploaded fileName and gdriveID save to database"
+def uploadToGdrive(fileName, mimeType):
+    gauth = GoogleAuth()
+    # 必須使用 desktop 版本的 client_secrets.json
+    gauth.LoadClientConfigFile("./../gdrive_desktop_client_secrets.json")
+    drive = GoogleDrive(gauth)
+    
+    '''
+    # View all folders and file in your Google Drive
+    fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+    for file in fileList:
+      print('Title: %s, ID: %s' % (file['title'], file['id']))
+      # Get the folder ID that you want
+      # 檔案會上傳到根目錄下的 uploaded  目錄中
+      if(file['title'] == "uploaded"):
+          fileID = file['id']
+    '''
+    # GDrive 上 uploaded 目錄的 fileID
+    with open("./../gdrive_uploaded_id.txt", 'r') as content_file:
+        fileID = content_file.read()
+    
+    # 由上述目錄外的檔案讀取 uploaded 目錄對應 ID
+    #fileID = "your_folder_file_ID"
+    # 上傳檔案名稱為輸入變數
+    #fileName = "DemoFile.pdf"
+    filePath = _curdir + "/downloads/"
+    # parents 為所在 folder, 亦即 uploaded 目錄, fileID 為 uploaded 目錄的 ID
+    file1 = drive.CreateFile({"mimeType": mimeType, "parents": [{"kind": "drive#fileLink", "id": fileID}], "title":  fileName})
+    file1.SetContentFile(filePath + fileName)
+    file1.Upload() # Upload the file.
+    # 傳回與上傳檔案對應的 GDrive ID, 將會存入資料庫 gdiveID 欄位
+    return file1['id']
+    #print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))   
+    #print("upload fileID:" + str(file1['id']))
+    # 以下為下載檔案測試
+    # file2 = drive.CreateFile({'id': file1['id']})
+    #file2.GetContentFile('./test/downloaded_ModernC.pdf') # Download file as 'downloaded_ModernC.pdf under directory test'.
+    
+    '''
+    file1.Trash()  # Move file to trash.
+    file1.UnTrash()  # Move file out of trash.
+    file1.Delete()  # Permanently delete the file.
+    '''
 
 if __name__ == "__main__":
     app.run()

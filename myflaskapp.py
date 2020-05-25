@@ -654,13 +654,21 @@ def doDelete():
 
 @app.route('/saveToDB' , methods=['POST'])
 def saveToDB():
-        if request.method == "POST":
-            files = request.form["files"]
-            # split files string
-            files = files.split(",")
-        with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
-            file.write(files[0])
-        return "files save to database"
+    
+    '''
+    axuploader.js 將檔案上傳後, 將上傳檔案名稱數列, 以 post 回傳到 Flask server.
+    
+    截至這裡, 表示檔案已經從 client 上傳至 server, 可以再設法通過認證, 將 server 上的檔案上傳到對應的 Google Drive, 並且在上傳後的 GDrive 目錄, 設定特定擷取權限 (例如: 只允許 @gm 用戶下載.
+    以下則可將 server 上傳後的擷取目錄與 GDrive 各檔案 ID 存入資料庫, 而檔案擷取則分為 server 擷取與 GDrive 擷取等兩種 url 連結設定
+    '''
+    
+    if request.method == "POST":
+        files = request.form["files"]
+        # split files string
+        files = files.split(",")
+    with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
+        file.write(files[0])
+    return "files save to database"
 
 if __name__ == "__main__":
     app.run()

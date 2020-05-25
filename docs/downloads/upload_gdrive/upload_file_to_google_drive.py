@@ -31,3 +31,9 @@ file1.Upload() # Upload the file.
 print("upload fileID:" + str(file1['id']))
 file2 = drive.CreateFile({'id': file1['id']})
 file2.GetContentFile('./test/downloaded_ModernC.pdf') # Download file as 'downloaded_ModernC.pdf under directory test'.
+
+'''
+file1.Trash()  # Move file to trash.
+file1.UnTrash()  # Move file out of trash.
+file1.Delete()  # Permanently delete the file.
+'''

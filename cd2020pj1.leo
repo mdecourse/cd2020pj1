@@ -40,7 +40,6 @@
 </v>
 <v t="leo.20200511213501.1"><vh>upload file to Gdrive</vh>
 <v t="yen.20200525140313.1"><vh>KMOL example</vh></v>
-<v t="leo.20200511215142.1"><vh>ref</vh></v>
 <v t="yen.20200519095851.1"><vh>javascript</vh>
 <v t="yen.20200519142351.1"><vh>ex1</vh></v>
 <v t="yen.20200519142439.1"><vh>ex2</vh></v>
@@ -717,45 +716,7 @@ def fileuploadform(edit):
 
 
 </t>
-<t tx="leo.20200511213501.1"># pip install pydrive
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
- 
-gauth = GoogleAuth()
-gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
-drive = GoogleDrive(gauth)
- 
- 
-# View all folders and file in your Google Drive
-fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
-for file in fileList:
-  print('Title: %s, ID: %s' % (file['title'], file['id']))
-  # Get the folder ID that you want
-  if(file['title'] == "uploaded"):
-      fileID = file['id']
- 
-file1 = drive.CreateFile({"mimeType": "application/pdf", "parents": [{"kind": "drive#fileLink", "id": fileID}]})
-file1.SetContentFile("file_to_upload.pdf")
-file1.Upload() # Upload the file.
-print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))</t>
-<t tx="leo.20200511215142.1">https://github.com/gsuitedevs/PyDrive/issues/115
-
-https://github.com/richiverse/gdrive-lambda/blob/master/app.py
-
-For example, you might want to integrate your existing website with Drive API. In that case, you can customize authentication flow as follwing:
-
-1. Get authentication Url from GetAuthUrl().
-2. Ask users to visit the authentication Url and grant access to your application. Retrieve authentication code manually by user or automatically by building your own oauth2callback.
-3. Call Auth(code) with the authentication code you retrieved from step 2.
-
-Your settings.yaml will work for your customized authentication flow, too.
-	
-from pydrive.auth import GoogleAuth
-
-gauth = GoogleAuth()
-auth_url = gauth.GetAuthUrl() # Create authentication url user needs to visit
-code = AskUserToVisitLinkAndGiveCode(auth_url) # Your customized authentication flow
-gauth.Auth(code) # Authorize and build service from the code</t>
+<t tx="leo.20200511213501.1">https://pythonhosted.org/PyDrive/index.html</t>
 <t tx="yen.20200414102935.1">http://peterhudec.github.io/authomatic/</t>
 <t tx="yen.20200414102935.2">config.py
 
@@ -1677,13 +1638,21 @@ https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpReq
 To send an HTTP request, create an XMLHttpRequest object, open a URL, and send the request. After the transaction completes, the object will contain useful information such as the response body and the HTTP status of the result.</t>
 <t tx="yen.20200523231031.1">@app.route('/saveToDB' , methods=['POST'])
 def saveToDB():
-        if request.method == "POST":
-            files = request.form["files"]
-            # split files string
-            files = files.split(",")
-        with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
-            file.write(files[0])
-        return "files save to database"</t>
+    
+    '''
+    axuploader.js 將檔案上傳後, 將上傳檔案名稱數列, 以 post 回傳到 Flask server.
+    
+    截至這裡, 表示檔案已經從 client 上傳至 server, 可以再設法通過認證, 將 server 上的檔案上傳到對應的 Google Drive, 並且在上傳後的 GDrive 目錄, 設定特定擷取權限 (例如: 只允許 @gm 用戶下載.
+    以下則可將 server 上傳後的擷取目錄與 GDrive 各檔案 ID 存入資料庫, 而檔案擷取則分為 server 擷取與 GDrive 擷取等兩種 url 連結設定
+    '''
+    
+    if request.method == "POST":
+        files = request.form["files"]
+        # split files string
+        files = files.split(",")
+    with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
+        file.write(files[0])
+    return "files save to database"</t>
 <t tx="yen.20200525094431.1">2020.05.25
 
     1. 已經在檔案上傳後加上取得上傳檔案的數列, 目前將檔名存檔, 準備改存入資料庫
@@ -1731,6 +1700,12 @@ file1.Upload() # Upload the file.
 print("upload fileID:" + str(file1['id']))
 file2 = drive.CreateFile({'id': file1['id']})
 file2.GetContentFile('./test/downloaded_ModernC.pdf') # Download file as 'downloaded_ModernC.pdf under directory test'.
+
+'''
+file1.Trash()  # Move file to trash.
+file1.UnTrash()  # Move file out of trash.
+file1.Delete()  # Permanently delete the file.
+'''
 </t>
 </tnodes>
 </leo_file>

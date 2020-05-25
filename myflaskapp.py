@@ -385,49 +385,11 @@ def fileaxupload():
 @app.route('/fileuploadform', defaults={'edit':1})
 @app.route('/fileuploadform/<path:edit>')
 def fileuploadform(edit):
-    return "<h1>file upload</h1>" + \
-                 '''<script src="/static/jquery.js" type="text/javascript"></script>
-<script src="/static/axuploader.js" type="text/javascript"></script>
-<script>
-// 用於將各上傳檔案名稱存入資料庫中, 檔案刪除時從資料庫中移除
-function sendToServer(files){
-    var req = new XMLHttpRequest();
-    var result = document.getElementById('result');
-    req.onreadystatechange = function()
-    {
-      if(this.readyState == 4 && this.status == 200) {
-        result.innerHTML = this.responseText;
-      } else {
-        result.innerHTML = "working...";
-      }
-    }
-    
-    req.open('POST', '/saveToDB', true);
-    req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    req.send("files=" +  files);
-}
+    '''
+    準備改寫為 template 傳回上傳表單, 或加上其他相關欄位
+    '''
+    return render_template("uploadform.html")
 
-$(document).ready(function(){
-$('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
-finish:function(x,files)
-    {
-        // 這裡要利用 sendToServer 函式將 files 數列傳到 server, 再由 python 納入資料庫
-        sendToServer(files);
-        alert('All files have been uploaded: '+files);
-
-    },
-enable:true,
-remotePath:function(){
-return 'downloads/';
-}
-});
-});
-</script>
-<div class="prova"></div>
-<input type="button" onclick="$('.prova').axuploader('disable')" value="asd" />
-<input type="button" onclick="$('.prova').axuploader('enable')" value="ok" />
-</section></body></html>
-'''
 
 
 @app.route('/download/', methods=['GET'])
@@ -456,6 +418,9 @@ def downloads(path):
 @app.route('/download_list', methods=['GET'])
 @login_required
 def download_list():
+    '''
+    準備改寫為 template based
+    '''
 
     """List files in downloads directory
     """

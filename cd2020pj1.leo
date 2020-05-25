@@ -10,6 +10,7 @@
 <v t="leo.20200511204814.2"><vh>@data qt-gui-plugin-style-sheet</vh></v>
 <v t="leo.20200511204814.3"><vh>@string initial_split_orientation = horizontal</vh></v>
 </v>
+<v t="yen.20200525094431.1"><vh>開發日誌</vh></v>
 <v t="yen.20200414103032.1"><vh>For Mac users</vh></v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="yen.20200418212333.1"><vh>Status</vh></v>
@@ -38,6 +39,7 @@
 <v t="yen.20200414142052.1"><vh>Google logout and redirect</vh></v>
 </v>
 <v t="leo.20200511213501.1"><vh>upload file to Gdrive</vh>
+<v t="yen.20200525140313.1"><vh>with auth flow</vh></v>
 <v t="leo.20200511215142.1"><vh>ref</vh></v>
 <v t="yen.20200519095851.1"><vh>javascript</vh>
 <v t="yen.20200519142351.1"><vh>ex1</vh></v>
@@ -104,6 +106,7 @@
 <v t="yen.20200523203310.1"><vh>變數</vh></v>
 <v t="yen.20200523205244.1"><vh>AJAX</vh></v>
 <v t="leo.20200511211602.1"><vh>@edit axuploader.js</vh></v>
+<v t="yen.20200525092904.1"><vh>@edit uploadform.js</vh></v>
 </v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
 <v t="yen.20200419213847.1"><vh>@edit drawROC.html</vh></v>
@@ -120,6 +123,7 @@
 <v t="yen.20200420144223.1"><vh>@edit menu.html</vh></v>
 <v t="yen.20200414111705.1"><vh>@edit index.html</vh></v>
 <v t="yen.20200414111741.1"><vh>@edit base.html</vh></v>
+<v t="yen.20200525094121.1"><vh>@edit uploadform.html</vh></v>
 </v>
 </vnodes>
 <tnodes>
@@ -705,49 +709,11 @@ def fileaxupload():
 @app.route('/fileuploadform', defaults={'edit':1})
 @app.route('/fileuploadform/&lt;path:edit&gt;')
 def fileuploadform(edit):
-    return "&lt;h1&gt;file upload&lt;/h1&gt;" + \
-                 '''&lt;script src="/static/jquery.js" type="text/javascript"&gt;&lt;/script&gt;
-&lt;script src="/static/axuploader.js" type="text/javascript"&gt;&lt;/script&gt;
-&lt;script&gt;
-// 用於將各上傳檔案名稱存入資料庫中, 檔案刪除時從資料庫中移除
-function sendToServer(files){
-    var req = new XMLHttpRequest();
-    var result = document.getElementById('result');
-    req.onreadystatechange = function()
-    {
-      if(this.readyState == 4 &amp;&amp; this.status == 200) {
-        result.innerHTML = this.responseText;
-      } else {
-        result.innerHTML = "working...";
-      }
-    }
-    
-    req.open('POST', '/saveToDB', true);
-    req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
-    req.send("files=" +  files);
-}
+    '''
+    準備改寫為 template 傳回上傳表單, 或加上其他相關欄位
+    '''
+    return render_template("uploadform.html")
 
-$(document).ready(function(){
-$('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
-finish:function(x,files)
-    {
-        // 這裡要利用 sendToServer 函式將 files 數列傳到 server, 再由 python 納入資料庫
-        sendToServer(files);
-        alert('All files have been uploaded: '+files);
-
-    },
-enable:true,
-remotePath:function(){
-return 'downloads/';
-}
-});
-});
-&lt;/script&gt;
-&lt;div class="prova"&gt;&lt;/div&gt;
-&lt;input type="button" onclick="$('.prova').axuploader('disable')" value="asd" /&gt;
-&lt;input type="button" onclick="$('.prova').axuploader('enable')" value="ok" /&gt;
-&lt;/section&gt;&lt;/body&gt;&lt;/html&gt;
-'''
 
 
 </t>
@@ -953,7 +919,9 @@ def autho_login(provider_name):
     
     # Don't forget to return the response.
     return response</t>
-<t tx="yen.20200414103032.1">Environment:
+<t tx="yen.20200414103032.1">While using Leo Editor on Mac,
+
+Environment:
 
     Leo Editor 6.2.1 final
     Python 3.7.3
@@ -1064,13 +1032,17 @@ g.es(secrets.token_urlsafe(24))
 <t tx="yen.20200418212333.1">1. oauth2 to login with Gmail account
 after system got user email, use session to save user email account and logout from Gmail right away.
 
+    Done
+
 and then redirect to guess method
 
 2. need to save the /randomgrouping result into SQLite database
 
+    Done
+
 3. socketio?
 
-http://mde.tw/cp2019/content/Flutter%20Mobile.html</t>
+    http://mde.tw/cp2019/content/Flutter%20Mobile.html</t>
 <t tx="yen.20200418223522.1">https://medium.com/@pyzimos/flutter-chatbot-with-python-flask-backend-heroku-deployment-706baafbb8f1</t>
 <t tx="yen.20200419155906.1"></t>
 <t tx="yen.20200419160014.1">@language python
@@ -1194,7 +1166,9 @@ g is Leo’s leo.core.leoGlobals module.
 p is the presently selected position, the same as c.p.
 '''
 g.es("copy drawROC.js to ./../docs/downloads/")</t>
-<t tx="yen.20200419234118.1">https://www.arc.id.au/GearDrawing.html</t>
+<t tx="yen.20200419234118.1">https://www.arc.id.au/GearDrawing.html
+
+Using Javascript and Cango Library for engineering drawing.</t>
 <t tx="yen.20200420141224.1">def login_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
@@ -1363,6 +1337,9 @@ def downloads(path):
 <t tx="yen.20200519105439.1">@app.route('/download_list', methods=['GET'])
 @login_required
 def download_list():
+    '''
+    準備改寫為 template based
+    '''
 
     """List files in downloads directory
     """
@@ -1707,5 +1684,44 @@ def saveToDB():
         with open('fileUploaded.txt', 'w', encoding="utf-8") as file:
             file.write(files[0])
         return "files save to database"</t>
+<t tx="yen.20200525094431.1">2020.05.25
+
+    1. 已經在檔案上傳後加上取得上傳檔案的數列, 目前將檔名存檔, 準備改存入資料庫
+    
+    2. 之後將逐一改寫未採 template based 的表單, 全部轉為以樣板模式送出 html 
+    
+    3. 另一項任務將是在上傳檔案存入伺服器硬碟的同時, 也將檔案存入 Google Drive, 並透過 url 註記在上傳檔案的資料庫表單中, 以便後續可以刪除或更新
+    
+    4. 目前已經將 Fossil SCM 配置在 labmdetw 網站中 (:5443, 並採 Letsencrypt 登記 https), 或許有機會在同一台伺服器中, 利用 session 轉換, 讓 Flask 網際程式與 Fossil SCM 都透過 Google OAuth2 帳號登入
+    
+    5. https://github.com/Yenthe666/InstallScript 中有 odoo 在 Ubuntu 安裝的 shell 程式, 從 odoo 的相依模組, Pypdf2, Mako 可以想見最早的 OpenERP 開發時, 是以 Flask 入手, 透過逐步的框架改寫與 extension 架構配置, 成為目前的 odoo 社群, 與網際機電資整合產品開發流程有關的方向, 可以從 odoo 與 Webots 下手.
+    
+    [odoo]: https://www.odoo.com/
+    [webots]: https://cyberbotics.com/</t>
+<t tx="yen.20200525140313.1">from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
+
+gauth = GoogleAuth()
+gauth.LoadClientConfigFile("./../client_secrets.json")
+gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
+drive = GoogleDrive(gauth)
+
+
+# View all folders and file in your Google Drive
+fileList = drive.ListFile({'q': "'root' in parents and trashed=false"}).GetList()
+for file in fileList:
+  print('Title: %s, ID: %s' % (file['title'], file['id']))
+  # Get the folder ID that you want
+  # 檔案會上傳到根目錄下的 uploaded  目錄中
+  if(file['title'] == "uploaded"):
+      fileID = file['id']
+
+fileName = "ModernC.pdf"
+filePath = "./test/"
+file1 = drive.CreateFile({"mimeType": "application/pdf", "parents": [{"kind": "drive#fileLink", "id": fileID}], "title":  fileName})
+file1.SetContentFile(filePath + fileName)
+file1.Upload() # Upload the file.
+print('Created file %s with mimeType %s' % (file1['title'], file1['mimeType']))   
+</t>
 </tnodes>
 </leo_file>

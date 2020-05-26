@@ -2,7 +2,7 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 
 gauth = GoogleAuth()
-gauth.LoadClientConfigFile("./../../../../gdrive_desktop_client_secrets.json")
+gauth.LoadClientConfigFile("./../../../../eisunwater_credentials.json")
 #gauth.LocalWebserverAuth() # client_secrets.json need to be in the same directory as the script
 drive = GoogleDrive(gauth)
 

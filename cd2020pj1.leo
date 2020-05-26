@@ -45,6 +45,9 @@
 <v t="yen.20200519142439.1"><vh>ex2</vh></v>
 </v>
 </v>
+<v t="yen.20200526093830.1"><vh>GDrive API v3</vh>
+<v t="yen.20200526211246.1"><vh>example</vh></v>
+</v>
 <v t="yen.20200423213714.1"><vh>Starting Flask</vh>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
 <v t="yen.20200418212208.1"><vh>Save grouping result into database</vh></v>
@@ -724,7 +727,9 @@ def fileuploadform(edit):
 
 
 </t>
-<t tx="leo.20200511213501.1">https://pythonhosted.org/PyDrive/index.html
+<t tx="leo.20200511213501.1">Pydrive 使用 Google Drive API v2, 而非最新的 v3
+
+https://pythonhosted.org/PyDrive/index.html
 
 https://www.mattbutton.com/2019/01/05/google-authentication-with-python-and-flask/
 
@@ -1783,5 +1788,78 @@ file1.Delete()  # Permanently delete the file.
     file1.UnTrash()  # Move file out of trash.
     file1.Delete()  # Permanently delete the file.
     '''</t>
+<t tx="yen.20200526093830.1">https://developers.google.com/drive/api/v3/quickstart/python
+
+https://github.com/5minds/GDrive-Tools
+
+https://pypi.org/project/gdrive-tools/
+
+https://stackoverflow.com/questions/54162891/google-drive-api-v3-change-file-permissions-and-get-publicly-shareable-link-pyt
+
+https://blog.gtwang.org/programming/automation-of-google-ocr-using-python-tutorial/
+
+https://medium.com/@yysu/%E7%B2%BE%E9%80%9Apython-30-days-day-3-54a0347a574b
+
+required modules
+
+pip3 install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+
+
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+</t>
+<t tx="yen.20200526211246.1">from __future__ import print_function
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+# If modifying these scopes, delete the file token.pickle.
+SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+
+def main():
+    """Shows basic usage of the Drive v3 API.
+    Prints the names and ids of the first 10 files the user has access to.
+    """
+    creds = None
+    # The file token.pickle stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+    if os.path.exists('./../../../../../gdrive_token.pickle'):
+        with open('./../../../../../gdrive_token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                './../../../../../gdrive_desktop_client_secrets.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open('./../../../../../gdrive_token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    service = build('drive', 'v3', credentials=creds)
+
+    # Call the Drive v3 API
+    results = service.files().list(
+        pageSize=10, fields="nextPageToken, files(id, name)").execute()
+    items = results.get('files', [])
+
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print(u'{0} ({1})'.format(item['name'], item['id']))
+
+if __name__ == '__main__':
+    main()</t>
 </tnodes>
 </leo_file>

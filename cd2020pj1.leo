@@ -46,8 +46,18 @@
 </v>
 </v>
 <v t="yen.20200526093830.1"><vh>GDrive API v3</vh>
+<v t="yen.20200527171248.1"><vh>get token</vh></v>
+<v t="yen.20200527171737.1"><vh>MediaFileUpload</vh></v>
+<v t="yen.20200527172037.1"><vh>googleapiclient.discovery</vh></v>
 <v t="yen.20200526211246.1"><vh>example</vh></v>
+<v t="yen.20200527153437.1"><vh>media file upload</vh></v>
+<v t="yen.20200527155239.1"><vh>example3</vh></v>
+<v t="yen.20200527160033.1"><vh>Pygdrive3</vh>
+<v t="yen.20200527160447.1"><vh>example</vh></v>
+<v t="yen.20200527160341.1"><vh>service</vh></v>
 </v>
+</v>
+<v t="yen.20200527155528.1"><vh>send email with Gmail</vh></v>
 <v t="yen.20200423213714.1"><vh>Starting Flask</vh>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
 <v t="yen.20200418212208.1"><vh>Save grouping result into database</vh></v>
@@ -102,6 +112,7 @@
 <v t="yen.20200519110824.1"><vh>doDelete</vh></v>
 <v t="yen.20200523231031.1"><vh>saveToDB</vh></v>
 <v t="yen.20200525194733.1"><vh>uploadToGdrive</vh></v>
+<v t="yen.20200527161936.1"><vh>uploadToGdrive3</vh></v>
 </v>
 </v>
 <v t="amd.20151020232503.1"><vh>@path static</vh>
@@ -167,6 +178,11 @@ from pydrive.drive import GoogleDrive
 
 # for get mimeType of uploaded file
 import mimetypes
+
+# for uploadToGDrive3
+import pickle
+from googleapiclient.discovery import build
+from apiclient.http import MediaFileUpload
 
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
@@ -1681,7 +1697,10 @@ def saveToDB():
             fileName = files[i]
             fileLocation = _curdir + "/downloads/" + fileName
             mimeType = mimetypes.MimeTypes().guess_type(fileLocation)[0]
-            gdriveID = uploadToGdrive(fileName, mimeType)
+            # for GDrive v2
+            #gdriveID = uploadToGdrive(fileName, mimeType)
+            # for GDrive v3
+            gdriveID = uploadToGdrive3(fileName, mimeType)
             fileSize = str(round(os.path.getsize(fileLocation)/(1024*1024.0), 2)) + " MB"
             date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
             user = session.get("user")
@@ -1861,5 +1880,514 @@ def main():
 
 if __name__ == '__main__':
     main()</t>
+<t tx="yen.20200527153437.1">file_metadata = {'name': 'photo.jpg'}
+media = MediaFileUpload('files/photo.jpg', mimetype='image/jpeg')
+file = drive_service.files().create(body=file_metadata,
+                                    media_body=media,
+                                    fields='id').execute()
+print('File ID: %s' % file.get('id'))
+
+
+
+
+
+file_metadata = {
+    'name': 'My Report',
+    'mimeType': 'application/vnd.google-apps.spreadsheet'
+}
+media = MediaFileUpload('files/report.csv',
+                        mimetype='text/csv',
+                        resumable=True)
+file = drive_service.files().create(body=file_metadata,
+                                    media_body=media,
+                                    fields='id').execute()
+print('File ID: %s' % file.get('id'))
+
+
+
+
+file_metadata = {
+    'name': 'Invoices',
+    'mimeType': 'application/vnd.google-apps.folder'
+}
+file = drive_service.files().create(body=file_metadata,
+                                    fields='id').execute()
+print('Folder ID: %s' % file.get('id'))
+
+
+
+
+folder_id = '0BwwA4oUTeiV1TGRPeTVjaWRDY1E'
+file_metadata = {
+    'name': 'photo.jpg',
+    'parents': [folder_id]
+}
+media = MediaFileUpload('files/photo.jpg',
+                        mimetype='image/jpeg',
+                        resumable=True)
+file = drive_service.files().create(
+                                    body=file_metadata,
+                                    media_body=media,
+                                    fields='id').execute()
+print('File ID: %s' % file.get('id'))
+
+
+
+
+
+file_id = '1sTWaJ_j7PkjzaBWtNc3IzovK5hQf21FbOw9yLeeLPNQ'
+folder_id = '0BwwA4oUTeiV1TGRPeTVjaWRDY1E'
+# Retrieve the existing parents to remove
+file = drive_service.files().get(fileId=file_id,
+                                 fields='parents').execute()
+previous_parents = ",".join(file.get('parents'))
+# Move the file to the new folder
+file = drive_service.files().update(fileId=file_id,
+                                    addParents=folder_id,
+                                    removeParents=previous_parents,
+                                    fields='id, parents').execute()
+
+
+
+
+file_id = '0BwwA4oUTeiV1UVNwOHItT0xfa2M'
+request = drive_service.files().get_media(fileId=file_id)
+fh = io.BytesIO()
+downloader = MediaIoBaseDownload(fh, request)
+done = False
+while done is False:
+    status, done = downloader.next_chunk()
+    print("Download %d%%." % int(status.progress() * 100))
+
+
+
+
+file_id = '1ZdR3L3qP4Bkq8noWLJHSr_iBau0DNT4Kli4SxNc2YEo'
+request = drive_service.files().export_media(fileId=file_id,
+                                             mimeType='application/pdf')
+fh = io.BytesIO()
+downloader = MediaIoBaseDownload(fh, request)
+done = False
+while done is False:
+    status, done = downloader.next_chunk()
+    print ("Download %d%%." % int(status.progress() * 100))
+</t>
+<t tx="yen.20200527155239.1">@language python
+# https://github.com/samlopezf/google-drive-api-tutorial
+from __future__ import print_function
+import httplib2
+import os, io
+
+from apiclient import discovery
+from oauth2client import client
+from oauth2client import tools
+from oauth2client.file import Storage
+from apiclient.http import MediaFileUpload, MediaIoBaseDownload
+try:
+    import argparse
+    flags = argparse.ArgumentParser(parents=[tools.argparser]).parse_args()
+except ImportError:
+    flags = None
+import auth
+# If modifying these scopes, delete your previously saved credentials
+# at ~/.credentials/drive-python-quickstart.json
+SCOPES = 'https://www.googleapis.com/auth/drive'
+CLIENT_SECRET_FILE = 'client_secret.json'
+APPLICATION_NAME = 'Drive API Python Quickstart'
+authInst = auth.auth(SCOPES,CLIENT_SECRET_FILE,APPLICATION_NAME)
+credentials = authInst.getCredentials()
+
+http = credentials.authorize(httplib2.Http())
+drive_service = discovery.build('drive', 'v3', http=http)
+
+def listFiles(size):
+    results = drive_service.files().list(
+        pageSize=size,fields="nextPageToken, files(id, name)").execute()
+    items = results.get('files', [])
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print('{0} ({1})'.format(item['name'], item['id']))
+
+def uploadFile(filename,filepath,mimetype):
+    file_metadata = {'name': filename}
+    media = MediaFileUpload(filepath,
+                            mimetype=mimetype)
+    file = drive_service.files().create(body=file_metadata,
+                                        media_body=media,
+                                        fields='id').execute()
+    print('File ID: %s' % file.get('id'))
+
+def downloadFile(file_id,filepath):
+    request = drive_service.files().get_media(fileId=file_id)
+    fh = io.BytesIO()
+    downloader = MediaIoBaseDownload(fh, request)
+    done = False
+    while done is False:
+        status, done = downloader.next_chunk()
+        print("Download %d%%." % int(status.progress() * 100))
+    with io.open(filepath,'wb') as f:
+        fh.seek(0)
+        f.write(fh.read())
+
+def createFolder(name):
+    file_metadata = {
+    'name': name,
+    'mimeType': 'application/vnd.google-apps.folder'
+    }
+    file = drive_service.files().create(body=file_metadata,
+                                        fields='id').execute()
+    print ('Folder ID: %s' % file.get('id'))
+
+def searchFile(size,query):
+    results = drive_service.files().list(
+    pageSize=size,fields="nextPageToken, files(id, name, kind, mimeType)",q=query).execute()
+    items = results.get('files', [])
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print(item)
+            print('{0} ({1})'.format(item['name'], item['id']))
+#uploadFile('unnamed.jpg','unnamed.jpg','image/jpeg')
+#downloadFile('1Knxs5kRAMnoH5fivGeNsdrj_SIgLiqzV','google.jpg')
+#createFolder('Google')
+searchFile(10,"name contains 'Getting'")</t>
+<t tx="yen.20200527155528.1">https://github.com/samlopezf/gmail-api-sending-emails-tutorial
+
+</t>
+<t tx="yen.20200527160033.1">https://pypi.org/project/pygdrive3/</t>
+<t tx="yen.20200527160341.1">@language python
+from __future__ import print_function
+from apiclient.discovery import build
+from apiclient.http import MediaFileUpload
+from httplib2 import Http
+from oauth2client import file, client, tools
+import mimetypes
+import os
+
+
+class DriveService:
+    def __init__(self, client_secret):
+
+        client_secret_path = os.path.abspath(client_secret)
+        has_client_secret = os.path.isfile(client_secret_path)
+
+        if not has_client_secret:
+            link = 'https://developers.google.com/drive/api/v3/quickstart/python'
+            raise NameError(
+                '&lt;client_secret.json&gt; not Found. Access the following link and go to step one to get your client_secret.json file:\n {0}'.format(link))
+
+        self.client_secret = client_secret_path
+
+    def auth(self):
+        current_dir = os.getcwd()
+        credentials_dir = os.path.join(
+            current_dir, os.path.abspath('./credentials'))
+        if not os.path.exists(credentials_dir):
+            os.makedirs(credentials_dir)
+        SCOPES = 'https://www.googleapis.com/auth/drive'
+        store = file.Storage(credentials_dir + '/credentials.json')
+        creds = store.get()
+        if not creds or creds.invalid:
+            flow = client.flow_from_clientsecrets(self.client_secret, SCOPES)
+            creds = tools.run_flow(flow, store)
+        self.drive_service = build('drive', 'v3', http=creds.authorize(Http()))
+
+    def create_folder(self, name, parent_id=None):
+        if parent_id != None:
+            metadata = {
+                'name': name,
+                'mimeType': 'application/vnd.google-apps.folder',
+                'parents': [parent_id]
+            }
+        else:
+            metadata = {
+                'name': name,
+                'mimeType': 'application/vnd.google-apps.folder'
+            }
+
+        folder = self.drive_service.files().create(
+            body=metadata,
+            fields='id'
+        ).execute()
+
+        return folder.get('id')
+
+    def upload_file(self, name, filePath, folder_id):
+        fileType = mimetypes.guess_type(filePath)[0]
+        if fileType == None:
+            raise NameError("Invalid type or missing suffix!")
+
+        file_metadata = {
+            'name': name + '.' + fileType.split('/')[-1],
+            'parents': [folder_id]
+        }
+        media = MediaFileUpload(filePath, mimetype=fileType)
+
+        file = self.drive_service.files().create(
+            body=file_metadata,
+            media_body=media,
+            fields='id'
+        ).execute()
+
+        return file.get('id')
+
+    def writer_permission(self, email, file_id):
+        batch = self.drive_service.new_batch_http_request(
+            callback=self.__callback)
+        permission = {
+            'type': 'user',
+            'role': 'writer',
+            'emailAddress': email
+        }
+        batch.add(self.drive_service.permissions().create(
+            fileId=file_id,
+            body=permission,
+            fields='id',
+        ))
+        batch.execute()
+
+        return True
+
+    def reader_permission(self, email, file_id):
+        batch = self.drive_service.new_batch_http_request(
+            callback=self.__callback)
+        permission = {
+            'type': 'user',
+            'role': 'reader',
+            'emailAddress': email
+        }
+        batch.add(self.drive_service.permissions().create(
+            fileId=file_id,
+            body=permission,
+            fields='id',
+        ))
+        batch.execute()
+
+        return True
+
+    def transfer_ownership(self, email, file_id):
+        batch = self.drive_service.new_batch_http_request(
+            callback=self.__callback)
+        permission = {
+            'type': 'user',
+            'role': 'owner',
+            'emailAddress': email
+        }
+        batch.add(self.drive_service.permissions().create(
+            transferOwnership=True,
+            fileId=file_id,
+            body=permission,
+            fields='id',
+        ))
+        batch.execute()
+
+        return True
+
+    def anyone_permission(self, file_id):
+        batch = self.drive_service.new_batch_http_request(
+            callback=self.__callback)
+        permission = {
+            'type': 'anyone',
+            'role': 'reader'
+        }
+        batch.add(self.drive_service.permissions().create(
+            fileId=file_id,
+            body=permission,
+            fields='id',
+        ))
+        batch.execute()
+
+        return 'https://drive.google.com/file/d/{0}/view?usp=sharing'.format(file_id)
+
+    def get_file_info(self, file_id):
+        fields = "kind,name,mimeType,description,parents,version,createdTime,modifiedTime,lastModifyingUser,size"
+
+        file = self.drive_service.files().get(fileId=file_id, fields=fields).execute()
+
+        return file
+
+    def list_files_from_folder_id(self, folder_id):
+        itemsList = []
+
+        page_token = None
+        while True:
+            response = self.drive_service.files().list(
+                q="'" + folder_id + "' in parents",
+                spaces='drive',
+                fields='nextPageToken, files(id, name, modifiedTime, mimeType, size)',
+                page_token=page_token
+            ).execute()
+
+            for file in response.get('files', []):
+                # Process change
+                itemsList.append({
+                    'id': file.get('id'),
+                    'name': file.get('name'),
+                    'modifiedTime': file.get('modifiedTime'),
+                    'type': file.get('mimeType'),
+                    'size': file.get('size')
+                })
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
+
+        return itemsList
+
+    def list_folders_by_name(self, name):
+        return self.__list_items_by_name(name, "mimeType = 'application/vnd.google-apps.folder'")
+
+    def list_files_by_name(self, name):
+        return self.__list_items_by_name(name, "mimeType != 'application/vnd.google-apps.folder'")
+
+    def __list_items_by_name(self, name, extraQuery=None):
+        query = 'name contains \'' + name + '\''
+
+        if extraQuery != None:
+            query += " and " + extraQuery
+
+        print(query)
+        itemsList = []
+
+        page_token = None
+        while True:
+            response = self.drive_service.files().list(
+                q=query,
+                spaces='drive',
+                fields='nextPageToken, files(id, name, modifiedTime, mimeType, size)',
+                pageToken=page_token
+            ).execute()
+
+            for file in response.get('files', []):
+                # Process change
+                itemsList.append({
+                    'id': file.get('id')
+                })
+            page_token = response.get('nextPageToken', None)
+            if page_token is None:
+                break
+
+        return itemsList
+
+    def __callback(self, request_id, response, exception):
+        if exception:
+            # Handle error
+            print(exception)
+        else:
+            pass
+</t>
+<t tx="yen.20200527160447.1">from pygdrive3 import service
+
+drive_service = service.DriveService('./client_secret.json')
+drive_service.auth()
+
+folder = drive_service.create_folder('Xesque')
+file = drive_service.upload_file('Arquivo Teste', './files/test.pdf', folder)
+link = drive_service.anyone_permission(file)
+
+folders = drive_service.list_folders_by_name('Xesque')
+files = drive_service.list_files_by_name('Arquivo Teste')
+
+files_from_folder = drive_service.list_files_from_folder_id(folder)</t>
+<t tx="yen.20200527161936.1">def uploadToGdrive3(fileName, mimeType):
+    # get upload folder id
+    # GDrive 上 uploaded 目錄的 fileID
+    with open("./../gdrive_uploaded_id.txt", 'r') as content_file:
+        folderID = content_file.read()
+
+    creds = None
+    with open('./../gdrive_write_token.pickle', 'rb') as token:
+        creds = pickle.load(token)
+    # 讀進既有的 token, 建立 service
+    driveService = build('drive', 'v3', credentials=creds)
+
+    metadata = {
+        'name': fileName,
+        'mimeType': mimeType,
+        # 注意: 必須提供數列格式資料
+        'parents': [folderID]
+        }
+
+    filePath = _curdir + "/downloads/" + fileName
+    media = MediaFileUpload(filePath,
+                                            mimetype=mimeType,
+                                            resumable=True
+                                            )
+
+    gdFile = driveService.files().create(
+        body=metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+    fileID = gdFile.get("id")
+
+    return fileID
+</t>
+<t tx="yen.20200527171248.1">@language python
+# under cd2020pj1/docs/download/upload_gdrive/v3
+from __future__ import print_function
+import pickle
+import os.path
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+# get upload folder id
+# GDrive 上 uploaded 目錄的 fileID
+with open("./../../../../../gdrive_uploaded_id.txt", 'r') as content_file:
+    fileID = content_file.read()
+
+# If modifying these scopes, delete the file token.pickle.
+#SCOPES = ['https://www.googleapis.com/auth/drive.metadata.readonly']
+SCOPES = ['https://www.googleapis.com/auth/drive']
+
+def main():
+    """Shows basic usage of the Drive v3 API.
+    Prints the names and ids of the first 10 files the user has access to.
+    """
+    creds = None
+    # The file token.pickle stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+    if os.path.exists('./../../../../../gdrive_token.pickle'):
+        with open('./../../../../../gdrive_token.pickle', 'rb') as token:
+            creds = pickle.load(token)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                './../../../../../gdrive_desktop_client_secrets.json', SCOPES)
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open('./../../../../../gdrive_token.pickle', 'wb') as token:
+            pickle.dump(creds, token)
+
+    service = build('drive', 'v3', credentials=creds)
+
+    # Call the Drive v3 API
+    results = service.files().list(
+        pageSize=10, fields="nextPageToken, files(id, name)").execute()
+    items = results.get('files', [])
+
+    if not items:
+        print('No files found.')
+    else:
+        print('Files:')
+        for item in items:
+            print(u'{0} ({1})'.format(item['name'], item['id']))
+
+if __name__ == '__main__':
+    main()</t>
+<t tx="yen.20200527171737.1">https://googleapis.github.io/google-api-python-client/docs/epy/googleapiclient.http.MediaFileUpload-class.html</t>
+<t tx="yen.20200527172037.1">build
+
+
+https://googleapis.github.io/google-api-python-client/docs/epy/googleapiclient.discovery-module.html#build</t>
 </tnodes>
 </leo_file>

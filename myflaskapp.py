@@ -35,6 +35,11 @@ from pydrive.drive import GoogleDrive
 # for get mimeType of uploaded file
 import mimetypes
 
+# for uploadToGDrive3
+import pickle
+from googleapiclient.discovery import build
+from apiclient.http import MediaFileUpload
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
@@ -679,7 +684,10 @@ def saveToDB():
             fileName = files[i]
             fileLocation = _curdir + "/downloads/" + fileName
             mimeType = mimetypes.MimeTypes().guess_type(fileLocation)[0]
-            gdriveID = uploadToGdrive(fileName, mimeType)
+            # for GDrive v2
+            #gdriveID = uploadToGdrive(fileName, mimeType)
+            # for GDrive v3
+            gdriveID = uploadToGdrive3(fileName, mimeType)
             fileSize = str(round(os.path.getsize(fileLocation)/(1024*1024.0), 2)) + " MB"
             date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
             user = session.get("user")
@@ -732,6 +740,39 @@ def uploadToGdrive(fileName, mimeType):
     file1.UnTrash()  # Move file out of trash.
     file1.Delete()  # Permanently delete the file.
     '''
+def uploadToGdrive3(fileName, mimeType):
+    # get upload folder id
+    # GDrive 上 uploaded 目錄的 fileID
+    with open("./../gdrive_uploaded_id.txt", 'r') as content_file:
+        folderID = content_file.read()
+
+    creds = None
+    with open('./../gdrive_write_token.pickle', 'rb') as token:
+        creds = pickle.load(token)
+    # 讀進既有的 token, 建立 service
+    driveService = build('drive', 'v3', credentials=creds)
+
+    metadata = {
+        'name': fileName,
+        'mimeType': mimeType,
+        # 注意: 必須提供數列格式資料
+        'parents': [folderID]
+        }
+
+    filePath = _curdir + "/downloads/" + fileName
+    media = MediaFileUpload(filePath,
+                                            mimetype=mimeType,
+                                            resumable=True
+                                            )
+
+    gdFile = driveService.files().create(
+        body=metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+    fileID = gdFile.get("id")
+
+    return fileID
 
 if __name__ == "__main__":
     app.run()

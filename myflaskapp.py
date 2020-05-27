@@ -36,6 +36,8 @@ from pydrive.drive import GoogleDrive
 import mimetypes
 
 # for uploadToGDrive3
+# pip install google-api-python-client
+# https://github.com/googleapis/google-api-python-client
 import pickle
 from googleapiclient.discovery import build
 from apiclient.http import MediaFileUpload
@@ -762,6 +764,7 @@ def uploadToGdrive3(fileName, mimeType):
     filePath = _curdir + "/downloads/" + fileName
     media = MediaFileUpload(filePath,
                                             mimetype=mimeType,
+                                            chunksize=1024*1024,
                                             resumable=True
                                             )
 

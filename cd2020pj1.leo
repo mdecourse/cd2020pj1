@@ -46,9 +46,22 @@
 </v>
 </v>
 <v t="yen.20200526093830.1"><vh>GDrive API v3</vh>
-<v t="yen.20200527171248.1"><vh>get token</vh></v>
+<v t="yen.20200527171248.1"><vh>get token by program</vh></v>
+<v t="yen.20200527214348.1"><vh>get token from credential</vh></v>
 <v t="yen.20200527171737.1"><vh>MediaFileUpload</vh></v>
 <v t="yen.20200527172037.1"><vh>googleapiclient.discovery</vh></v>
+<v t="yen.20200527202743.1"><vh>create new folder</vh></v>
+<v t="yen.20200527210816.1"><vh>trash file</vh></v>
+<v t="yen.20200527212939.1"><vh>delete file</vh></v>
+<v t="yen.20200527213626.1"><vh>download file </vh></v>
+<v t="yen.20200527213743.1"><vh>upload from local to GDrive</vh></v>
+<v t="yen.20200527230155.1"><vh>fileaxupload  傳檔至 GDrive</vh></v>
+<v t="yen.20200527215250.1"><vh>upload with post method</vh>
+<v t="yen.20200527215737.1"><vh>in Javascript</vh></v>
+<v t="yen.20200527220755.1"><vh>in python</vh>
+<v t="yen.20200527220955.1"><vh>resumable</vh></v>
+</v>
+</v>
 <v t="yen.20200526211246.1"><vh>example</vh></v>
 <v t="yen.20200527153437.1"><vh>media file upload</vh></v>
 <v t="yen.20200527155239.1"><vh>example3</vh></v>
@@ -180,6 +193,8 @@ from pydrive.drive import GoogleDrive
 import mimetypes
 
 # for uploadToGDrive3
+# pip install google-api-python-client
+# https://github.com/googleapis/google-api-python-client
 import pickle
 from googleapiclient.discovery import build
 from apiclient.http import MediaFileUpload
@@ -1810,6 +1825,7 @@ file1.Delete()  # Permanently delete the file.
 <t tx="yen.20200526093830.1">https://developers.google.com/drive/api/v3/quickstart/python
 
 https://github.com/5minds/GDrive-Tools
+upload 1.3 GB 至 Google Drive 約費時 10 分鐘
 
 https://pypi.org/project/gdrive-tools/
 
@@ -2059,7 +2075,9 @@ searchFile(10,"name contains 'Getting'")</t>
 <t tx="yen.20200527155528.1">https://github.com/samlopezf/gmail-api-sending-emails-tutorial
 
 </t>
-<t tx="yen.20200527160033.1">https://pypi.org/project/pygdrive3/</t>
+<t tx="yen.20200527160033.1">https://pypi.org/project/pygdrive3/
+
+https://github.com/matAlmeida/pygdrive3/blob/master/pygdrive3/service.py</t>
 <t tx="yen.20200527160341.1">@language python
 from __future__ import print_function
 from apiclient.discovery import build
@@ -2315,6 +2333,7 @@ files_from_folder = drive_service.list_files_from_folder_id(folder)</t>
     filePath = _curdir + "/downloads/" + fileName
     media = MediaFileUpload(filePath,
                                             mimetype=mimeType,
+                                            chunksize=1024*1024,
                                             resumable=True
                                             )
 
@@ -2389,5 +2408,248 @@ if __name__ == '__main__':
 
 
 https://googleapis.github.io/google-api-python-client/docs/epy/googleapiclient.discovery-module.html#build</t>
+<t tx="yen.20200527202743.1">@language python
+# http://eyana.me/upload-files-to-gdrive-using-python-part-1/
+
+# ---------------------------------------
+# GDrive API: Create New Folder
+# ---------------------------------------
+def createGDriveFolder(filename,parent):  
+    file_metadata = {'name': filename,'parents': [parent],
+    'mimeType': "application/vnd.google-apps.folder"}
+
+    folder = SERVICE.files().create(body=file_metadata,
+                                        fields='id').execute()
+    print('Upload Success!')
+    print('FolderID:', folder.get('id'))
+    return folder.get('id')</t>
+<t tx="yen.20200527210816.1"># https://developers.google.com/drive/api/v3/reference/files/update
+
+def trashFile(service, file_id):
+    body = {'trashed': True}
+    updated_file = service.files().update(fileId=file_id, body=body).execute()
+    return updated_file</t>
+<t tx="yen.20200527212939.1">https://developers.google.com/drive/api/v3/reference/files/delete
+
+service.files().delete(file.getId()).execute();</t>
+<t tx="yen.20200527213626.1">from __future__ import print_function
+from flask import Flask, render_template, jsonify, request
+import sys, requests, mimetypes
+import pickle
+import io
+import os.path
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaIoBaseDownload, MediaFileUpload
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+@app.route('/drive_download')
+def drive_download():
+
+
+    #CREDENTIALS
+    try:
+
+        SCOPES = ['https://www.googleapis.com/auth/drive']
+        ##this might need to be swapped out to work with google picker authentication
+        creds = None
+        if os.path.exists('token.pickle'):
+            with open('token.pickle', 'rb') as token:
+                creds = pickle.load(token)
+        # If there are no (valid) credentials available, let the user log in.
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                creds.refresh(Request())
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file('client_secret.json', SCOPES) #Client_secret.json is what I called my credentials.json
+                creds = flow.run_local_server()
+        # Save the credentials for the next run
+            with open('token.pickle', 'wb') as token:
+                pickle.dump(creds, token)
+
+
+
+
+        #DOWNLOAD FILE (I'm downloading a json file)
+
+        #Get file_id from AJAX call (this uses Picker to return the id of a file)  
+        file_id = request.args.get("fileID")
+
+        drive_service = build('drive', 'v3', credentials=creds)
+
+        requests = drive_service.files().get_media(fileId = file_id)
+        fh = io.BytesIO()
+        downloader = MediaIoBaseDownload(fh, requests)
+        done = False
+        while done is False:
+            status, done = downloader.next_chunk()
+            print("Download %d%%." % int(status.progress() * 100), file=sys.stderr)
+            fh.seek(0)
+            json = fh.read()
+            jsonRead = json.decode('utf-8') #decode from bytes into string
+
+        return jsonify(jsonRead) #Return file contents back to AJAX call
+
+    except Exception as e:
+        return(str(e))</t>
+<t tx="yen.20200527213743.1">import json
+import requests
+headers = {"Authorization": "Bearer ### access token ###"}
+para = {
+    "name": "sample.png",
+    "parents": ["### folder ID ###"]
+}
+files = {
+    'data': ('metadata', json.dumps(para), 'application/json; charset=UTF-8'),
+    'file': open("./sample.png", "rb")
+}
+r = requests.post(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    headers=headers,
+    files=files
+)
+print(r.text)</t>
+<t tx="yen.20200527214348.1">https://help.talend.com/reader/Ovc10QFckCdvYbzxTECexA/EoAKa_oFqZFXH0aE0wNbHQ</t>
+<t tx="yen.20200527215250.1">POST /drive/v3/files HTTP/1.1
+Host: www.googleapis.com
+Authorization: Bearer &lt;OAuth 2.0 access token here&gt;
+...
+
+{
+  "title": "file_name.extension",
+  "mimeType": "mime/type",
+  "description": "Stuff about the file"
+}
+</t>
+<t tx="yen.20200527215737.1">index.html
+
+&lt;form&gt;
+    &lt;span&gt;Upload: &lt;/span&gt;&lt;input id="file" type="file" name="myFile"&gt;
+&lt;/form&gt;
+
+Javascript:
+
+function gd_uploadFile(name, contentType, data, callback) {
+    const boundary = '-------314159265358979323846';
+    const delimiter = "\r\n--" + boundary + "\r\n";
+    const close_delim = "\r\n--" + boundary + "--";
+
+    contentType = contentType || "text/html";
+    var metadata = {
+        name: name,
+        'mimeType': contentType,
+        parents: [folderID]
+    };
+
+    var multipartRequestBody =
+        delimiter +  'Content-Type: application/json\r\n\r\n' +
+        JSON.stringify(metadata) +
+        delimiter +
+        'Content-Type: ' + contentType + '\r\n';
+
+    //Transfer images as base64 string.
+    if (contentType.indexOf('image/') === 0) {
+        var pos = data.indexOf('base64,');
+        multipartRequestBody += 'Content-Transfer-Encoding: base64\r\n' + '\r\n' +
+            data.slice(pos &lt; 0 ? 0 : (pos + 'base64,'.length));
+    } else {
+        multipartRequestBody +=  + '\r\n' + data;
+    }
+    multipartRequestBody += close_delim;
+
+    if (!callback) { callback = function(file) { console.log("Update Complete ", file) }; }
+
+    superagent.post('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart').
+        set('Content-Type', 'multipart/form-data;  boundary="' + boundary + '"').
+        set('Authorization', 'Bearer ' + gapi.auth.getToken().access_token).
+        send(multipartRequestBody).
+        end(function () {
+            console.log(arguments);
+        });
+}
+
+//On upload
+$('#file')[0].onchange = function () {
+    var file = $('#file')[0].files[0];
+    if (file &amp;&amp; file.type === 'image/jpeg') {
+        var reader = new FileReader();
+        reader.onloadend = function () {
+            var data = reader.result;
+            gd_uploadFile('img.jpg', 'image/jpeg', data, function () {
+                console.log(arguments);
+            });
+        }
+        reader.readAsDataURL(file);
+    }
+};</t>
+<t tx="yen.20200527220755.1">HTTP
+
+    Create a POST request to the method's /upload URI with the query parameter of uploadType=multipart:
+
+    POST https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart
+
+    Create the body of the request. Format the body according to the multipart/related content type [RFC 2387], which contains two parts:
+        Metadata. The metadata must come first and must have a Content-Type header set to application/json; charset=UTF-8. Add the file's metadata in JSON format.
+        Media. The media must come second and must have a Content-Type header of any MIME type. Add the file's data to the media part.
+
+    Identify each part with a boundary string, preceded by two hyphens. In addition, add two hyphens after the final boundary string.
+
+    Add these top-level HTTP headers:
+        Content-Type. Set to multipart/related and include the boundary string you're using to identify the different parts of the request. For example: Content-Type: multipart/related; boundary=foo_bar_baz
+        Content-Length. Set to the total number of bytes in the request body.
+
+    Send the request.
+
+To create or update the metadata portion only, without the associated data, send a POST or PUT request to the standard resource endpoint: https://www.googleapis.com/drive/v3/files If the request succeeds, the server returns the HTTP 200 OK status code along with the file's metadata.
+
+Note: To update an existing file, use PUT.</t>
+<t tx="yen.20200527220955.1">HTTP
+
+    Create a POST request to the method's /upload URI with the query parameter of uploadType=resumable:
+
+    POST https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable
+
+    If the initiation request succeeds, the response includes a 200 OK HTTP status code. In addition, it includes a Location header that specifies the resumable session URI:
+
+    HTTP/1.1 200 OK
+    Location: https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&amp;upload_id=xa298sd_sdlkj2
+    Content-Length: 0
+
+You should save the resumable session URI so you can upload the file data and query the upload status. A resumable session URI expires after one week.
+Note: To update an existing file, use PUT.
+
+If you have metadata for the file, add the metadata to the request body in JSON format. Otherwise, leave the request body empty.
+
+Add these HTTP headers:
+
+    X-Upload-Content-Type. Optional. Set to the MIME type of the file data, which is transferred in subsequent requests. If the MIME type of the data is not specified in metadata or through this header, the object is served as application/octet-stream.
+    X-Upload-Content-Length. Optional. Set to the number of bytes of file data, which is transferred in subsequent requests.
+    Content-Type. Required if you have metadata for the file. Set to application/json; charset=UTF-8.
+    Content-Length. Required unless you use chunked transfer encoding. Set to the number of bytes in the body of this initial request.
+
+Send the request. If the session initiation request succeeds, the response includes a 200 OK HTTP status code. In addition, the response includes a Location header that specifies the resumable session URI. Use the resumable session URI to upload the file data and query the upload status. A resumable session URI expires after one week.
+
+Copy and save the resumable session URL.
+
+Continue to [Uploading content](#uploading}</t>
+<t tx="yen.20200527230155.1">目前的 axuploader.js 以 ajax 將檔案以 chunk 方式送至 fileaxupload Python 函式進行存檔, 若要直接將檔案送往 GDrive, 必須參考由另一 filegdupload 函式準備授權 header 及所需傳送的參數, 送到 https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart 接收.
+
+import json
+import requests
+headers = {"Authorization": "Bearer ### access token ###"}
+para = {
+    "name": "sample.png",
+    "parents": ["### folder ID ###"]
+}
+files = {
+    'data': ('metadata', json.dumps(para), 'application/json; charset=UTF-8'),
+    'file': open("./sample.png", "rb")
+}
+r = requests.post(
+    "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+    headers=headers,
+    files=files
+)
+print(r.text)</t>
 </tnodes>
 </leo_file>

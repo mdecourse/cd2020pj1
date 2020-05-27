@@ -16,6 +16,7 @@ function sendToServer(files){
       }
     }
     
+    // 利用 POST 將上傳檔案名稱數列送至 server, 準備存入資料庫
     req.open('POST', '/saveToDB', true);
     req.setRequestHeader('content-type', 'application/x-www-form-urlencoded;charset=UTF-8');
     req.send("files=" +  files);

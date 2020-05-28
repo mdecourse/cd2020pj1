@@ -168,8 +168,40 @@ img.add_border {
 <p style="padding-left: 30px;">How to set IPv6 Nat Network port mapping?</p>
 <p style="padding-left: 30px;">How to edit netplan setting to allow bridged NIC working?</p>
 <p style="padding-left: 60px;"><a href="https://drive.google.com/open?id=1wNPk_scB3kE7nRVFk2yS_xn6Ony7069C">Tutorial video 1</a> (for @gm users only)</p>
-<p style="padding-left: 30px;"></p>
-<p style="padding-left: 30px;"></p><br />W7-W11 << <a href='W7-W11.html'>Previous</a> <a href='Ubuntu commands.html'>Next</a> >> Ubuntu commands</div>
+<p style="padding-left: 30px;">Add <a href="https://portableapps.com/apps/internet/filezilla_portable">Filezilla</a> to download and upload file between Windows and Virtual Ubuntu</p>
+<p style="padding-left: 30px;">    <a href="https://drive.google.com/open?id=1qQV9M9JSjWgl0ovLJxByhe_wLcAnzMdS">Tutorial video 2</a> (for @gm users only)</p>
+<h4>netplan 00-installer-config.yaml examples</h4>
+<p>Use dhcp4 and dhcp6, set Hinet dns as server:</p>
+<pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false">network:
+  ethernets:
+    enp0s3:
+        dhcp4: true
+        dhcp6: true
+        nameservers:
+            addresses:
+                - 2001:b000:168::1
+  version: 2</pre>
+<h4>Set IPv4 and IPv6 addresses, gateway and dns server:</h4>
+<pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false">network:
+    ethernets:
+        enp0s3:
+            dhcp4: false
+            dhcp6: false
+            addresses: 
+                - 192.168.1.13/24
+                - 2001:288:6004::1/64
+            gateway4: 192.168.1.1
+            gateway6: 2001:288:6004::254
+            nameservers:
+                addresses:
+                    - 140.130.1.2
+                    - 168.95.1.1
+                    - 2001:288:6004:1::2
+                    - 2001:b000:168::1
+    version: 2</pre>
+<h4>/etc/apt/apt.conf.d/proxy.conf</h4>
+<pre class="brush:js;auto-links:false;toolbar:false" contenteditable="false">Acquire::http::Proxy "http://[2001:288:6004:17::69]:3128/";</pre>
+<p></p><br />W7-W11 << <a href='W7-W11.html'>Previous</a> <a href='Ubuntu commands.html'>Next</a> >> Ubuntu commands</div>
         
     <!-- footer -->
       <div class="container">

@@ -42,6 +42,11 @@ import pickle
 from googleapiclient.discovery import build
 from apiclient.http import MediaFileUpload
 
+# for filegdupload
+import pickle
+import codecs
+import json
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
@@ -395,6 +400,52 @@ def fileaxupload():
     return "files uploaded!"
 
 
+# 希望直接由 browser client 將檔案以 chunked 大小送往 GD 儲存
+@login_required
+@app.route('/filegdupload', methods=['POST'])
+# ajax jquery chunked file upload for flask
+def filegdupload():
+    
+    with open('./../gdrive_write_token.pickle', 'rb') as token:
+        gdrive = pickle.load(token, encoding='utf-8')
+
+    with open("./../gdrive_uploaded_id.txt", 'r') as content_file:
+        folderID = content_file.read()
+
+    #print(gdrive.token)
+    ACCESS_TOKEN = gdrive.token
+    # need to consider if the uploaded filename already existed.
+    # right now all existed files will be replaced with the new files
+    fileName = request.args.get("ax-file-name")
+    
+    headers = {"Authorization": "Bearer " + ACCESS_TOKEN}
+    mimeType = mimetypes.MimeTypes().guess_type(fileName)[0]
+    metadata = {
+        'name': fileName,
+        'mimeType': mimeType,
+        # 注意: 必須提供數列格式資料
+        'parents': [folderID]
+        }
+
+    files = {
+    "data": ("metadata", json.dumps(metadata), "application/json; charset=UTF-8"),
+    "file": request.stream.read()
+    }
+
+    response = requests.post("https://www.googleapis.com/upload/drive/v2/files", headers=headers, files=files)
+
+    #return response 
+    '''
+    flag = request.args.get("start")
+    if flag == "0":
+        file = open(_curdir + "/downloads/" + filename, "wb")
+    else:
+        file = open(_curdir + "/downloads/" + filename, "ab")
+    file.write(request.stream.read())
+    file.close()
+    '''
+    return "files uploaded!"
+    
 @login_required
 @app.route('/fileuploadform', defaults={'edit':1})
 @app.route('/fileuploadform/<path:edit>')

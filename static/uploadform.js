@@ -23,7 +23,8 @@ function sendToServer(files){
 }
 
 $(document).ready(function(){
-$('.prova').axuploader({url:'fileaxupload', allowExt:['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
+$('.prova').axuploader({url:'fileaxupload', allowExt:
+['jpg','png','gif','7z','pdf','zip','flv','stl','swf'],
 finish:function(x,files)
     {
         // 這裡要利用 sendToServer 函式將 files 數列傳到 server, 再由 python 納入資料庫

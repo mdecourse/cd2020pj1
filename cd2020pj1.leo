@@ -115,6 +115,7 @@
 <v t="yen.20200414111938.1"><vh>login</vh></v>
 <v t="yen.20200420143358.1"><vh>logout</vh></v>
 <v t="leo.20200511205800.1"><vh>fileaxupload</vh></v>
+<v t="yen.20200528001940.1"><vh>filegdupload</vh></v>
 <v t="leo.20200511205824.1"><vh>fileuploadform</vh></v>
 <v t="yen.20200519105132.1"><vh>download</vh></v>
 <v t="yen.20200519105414.1"><vh>downloads</vh></v>
@@ -198,6 +199,11 @@ import mimetypes
 import pickle
 from googleapiclient.discovery import build
 from apiclient.http import MediaFileUpload
+
+# for filegdupload
+import pickle
+import codecs
+import json
 
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
@@ -2634,6 +2640,43 @@ Copy and save the resumable session URL.
 Continue to [Uploading content](#uploading}</t>
 <t tx="yen.20200527230155.1">目前的 axuploader.js 以 ajax 將檔案以 chunk 方式送至 fileaxupload Python 函式進行存檔, 若要直接將檔案送往 GDrive, 必須參考由另一 filegdupload 函式準備授權 header 及所需傳送的參數, 送到 https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart 接收.
 
+參考:
+
+import requests
+
+url = 'https://osa.nfu.edu.tw/query/studlist_ajax.php'
+post_var = {'pselyr': semester, 'pseqno': courseno}
+
+result = requests.post(url, data = post_var)
+
+#####################################
+
+import json
+import requests
+
+headers = {"Authorization": "Bearer " + ACCESS_TOKEN}
+
+metadata = {
+    'name': fileName,
+    'mimeType': mimeType,
+    # 注意: 必須提供數列格式資料
+    'parents': [folderID]
+    }
+
+filename = request.args.get("ax-file-name")
+
+files = {
+    "data": ("metadata", json.dumps(metadata), "application/json; charset=UTF-8"),
+    "file": request.stream.read()
+}
+
+response = requests.post("https://www.googleapis.com/upload/drive/v2/files?  uploadType=multipart", headers=headers, files=files)
+
+return response 
+
+#####################################
+
+
 import json
 import requests
 headers = {"Authorization": "Bearer ### access token ###"}
@@ -2651,5 +2694,51 @@ r = requests.post(
     files=files
 )
 print(r.text)</t>
+<t tx="yen.20200528001940.1"># 希望直接由 browser client 將檔案以 chunked 大小送往 GD 儲存
+@login_required
+@app.route('/filegdupload', methods=['POST'])
+# ajax jquery chunked file upload for flask
+def filegdupload():
+    
+    with open('./../gdrive_write_token.pickle', 'rb') as token:
+        gdrive = pickle.load(token, encoding='utf-8')
+
+    with open("./../gdrive_uploaded_id.txt", 'r') as content_file:
+        folderID = content_file.read()
+
+    #print(gdrive.token)
+    ACCESS_TOKEN = gdrive.token
+    # need to consider if the uploaded filename already existed.
+    # right now all existed files will be replaced with the new files
+    fileName = request.args.get("ax-file-name")
+    
+    headers = {"Authorization": "Bearer " + ACCESS_TOKEN}
+    mimeType = mimetypes.MimeTypes().guess_type(fileName)[0]
+    metadata = {
+        'name': fileName,
+        'mimeType': mimeType,
+        # 注意: 必須提供數列格式資料
+        'parents': [folderID]
+        }
+
+    files = {
+    "data": ("metadata", json.dumps(metadata), "application/json; charset=UTF-8"),
+    "file": request.stream.read()
+    }
+
+    response = requests.post("https://www.googleapis.com/upload/drive/v2/files", headers=headers, files=files)
+
+    #return response 
+    '''
+    flag = request.args.get("start")
+    if flag == "0":
+        file = open(_curdir + "/downloads/" + filename, "wb")
+    else:
+        file = open(_curdir + "/downloads/" + filename, "ab")
+    file.write(request.stream.read())
+    file.close()
+    '''
+    return "files uploaded!"
+    </t>
 </tnodes>
 </leo_file>

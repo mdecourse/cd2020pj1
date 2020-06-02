@@ -10,7 +10,9 @@
 <v t="leo.20200511204814.2"><vh>@data qt-gui-plugin-style-sheet</vh></v>
 <v t="leo.20200511204814.3"><vh>@string initial_split_orientation = horizontal</vh></v>
 </v>
-<v t="yen.20200525094431.1"><vh>開發日誌</vh></v>
+<v t="yen.20200525094431.1"><vh>開發日誌</vh>
+<v t="yen.20200601193216.1"><vh>採用 Mako template</vh></v>
+</v>
 <v t="yen.20200414103032.1"><vh>For Mac users</vh></v>
 <v t="amd.20150313083555.45"><vh>About cd2020pj1</vh></v>
 <v t="yen.20200418212333.1"><vh>Status</vh></v>
@@ -48,7 +50,9 @@
 <v t="yen.20200526093830.1"><vh>GDrive API v3</vh>
 <v t="yen.20200527171248.1"><vh>get token by program</vh></v>
 <v t="yen.20200527214348.1"><vh>get token from credential</vh></v>
+<v t="yen.20200529215216.1"><vh>example1</vh></v>
 <v t="yen.20200527171737.1"><vh>MediaFileUpload</vh></v>
+<v t="yen.20200529215344.1"><vh>example2</vh></v>
 <v t="yen.20200527172037.1"><vh>googleapiclient.discovery</vh></v>
 <v t="yen.20200527202743.1"><vh>create new folder</vh></v>
 <v t="yen.20200527210816.1"><vh>trash file</vh></v>
@@ -71,6 +75,8 @@
 </v>
 </v>
 <v t="yen.20200527155528.1"><vh>send email with Gmail</vh></v>
+<v t="yen.20200531203803.1"><vh>Python program with proxy</vh></v>
+<v t="yen.20200531204210.1"><vh>Bootstrap</vh></v>
 <v t="yen.20200423213714.1"><vh>Starting Flask</vh>
 <v t="leo.20200409150450.1"><vh>random grouping</vh>
 <v t="yen.20200418212208.1"><vh>Save grouping result into database</vh></v>
@@ -205,13 +211,19 @@ import pickle
 import codecs
 import json
 
+# for mako template engine
+# for mako template 系統
+from mako.template import Template
+from mako.lookup import TemplateLookup
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
 # 確定程式檔案所在目錄, 在 Windows 有最後的反斜線
 _curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
 download_dir = _curdir + "/downloads/"
-
+template_root_dir = _curdir + "/templates"
+    
 app = Flask(__name__)
 
 # 使用 session 必須要設定 secret_key
@@ -250,7 +262,9 @@ def guess():
     session['count'] = thecount
     user = session.get('user')
 
-    return render_template("guess.html", answer=theanswer, count=thecount, user=user)
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    guessTemplate = template_lookup.get_template("guess.html")
+    return guessTemplate.render(answer=theanswer, count=thecount, user=user)
 
 
 </t>
@@ -274,10 +288,14 @@ def guessform():
     guess = session.get("guess")
     theanswer = session.get("answer")
     count = session.get("count")
-    return render_template("guessform.html", guess=guess, answer=theanswer, count=count)</t>
+    
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    guessTemplate = template_lookup.get_template("guessform.html")
+    return guessTemplate.render(guess=guess, answer=theanswer, count=count)</t>
 <t tx="amd.20151021000629.1">@app.route('/docheck', methods=['POST'])
 @login_required
 def docheck():
+    template_lookup = TemplateLookup(directories=[template_root_dir])
     if not session.get('login'):
         return redirect(url_for('index'))
     # use session[] to save data
@@ -302,16 +320,20 @@ def docheck():
     session["count"] += 1
     count = session.get("count")
     # compare the answer and the guess value
+    tooBigTemplate = template_lookup.get_template("toobig.html")
+    tooSmallTemplate = template_lookup.get_template("toosmall.html")
     if theanswer &lt; theguess:
-        return render_template("toobig.html", guess=guess, answer=theanswer, count=count)
+        return tooBigTemplate.render(guess=guess, answer=theanswer, count=count)
     elif theanswer &gt; theguess:
-        return render_template("toosmall.html", guess=guess, answer=theanswer, count=count)
+        return tooSmallTemplate.render(guess=guess, answer=theanswer, count=count)
     else:
         # 
         # got the answer, get count from session
         thecount = session.get('count')
         return "Guess "+str(thecount)+" times, finally got the answer, the answer is "+str(theanswer)+": &lt;a href='/guess'&gt;Play again&lt;/a&gt;"
-    return render_template("docheck.html", guess=guess)
+
+    doCheckTemplate = template_lookup.get_template("docheck.html")
+    return doCheckTemplate.render(guess=guess)
  </t>
 <t tx="leo.20200311103136.1">Location of openssl from https://www.msys2.org/
 
@@ -759,7 +781,9 @@ def fileuploadform(edit):
     '''
     準備改寫為 template 傳回上傳表單, 或加上其他相關欄位
     '''
-    return render_template("uploadform.html")
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    uploadFormTemplate = template_lookup.get_template("uploadform.html")
+    return uploadFormTemplate.render()
 
 
 
@@ -996,8 +1020,11 @@ Create OAuth client ID
 Application type: Web application</t>
 <t tx="yen.20200414111904.1">@app.route('/')
 # root of the system can not set "login_required" decorator
+# 開始改用 Make 作為 Template
 def index():
-    return render_template('index.html')
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    indexTemplate = template_lookup.get_template("index.html")
+    return indexTemplate.render()
 </t>
 <t tx="yen.20200414111938.1">@app.route('/login/&lt;provider_name&gt;/', methods=['GET', 'POST'])
 def login(provider_name):
@@ -1019,12 +1046,12 @@ def login(provider_name):
         loginUser = result.user.email.split("@")[0]
         session["user"] = loginUser
         session["login"] = True
-        
+        template_lookup = TemplateLookup(directories=[template_root_dir])
+        loginTemplate = template_lookup.get_template("login.html")
         CALLBACK_URL = "https://localhost:8443/menu"
-    
-        # The rest happens inside the template.
-        return render_template('login.html', result=result, CALLBACK_URL=CALLBACK_URL)
-    
+        
+        return loginTemplate.render(result=result, CALLBACK_URL=CALLBACK_URL)
+
     # Don't forget to return the response.
     return response
 </t>
@@ -1174,7 +1201,9 @@ g.es("drawROC.js created")</t>
 <t tx="yen.20200419213555.1">@app.route('/drawROC')
 @login_required
 def drawROC():
-    return render_template("drawROC.html")
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    rocTemplate = template_lookup.get_template("drawROC.html")
+    return rocTemplate.render()
     </t>
 <t tx="yen.20200419224718.1">Here we use Flask to send variables through GET or POST to integrated with Dart programs.</t>
 <t tx="yen.20200419230015.1">@language python
@@ -1213,7 +1242,9 @@ def logout():
 @login_required
 def menu():
     menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list"]
-    return render_template("menu.html", menuList=menuList)</t>
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    menuTemplate = template_lookup.get_template("menu.html")
+    return menuTemplate.render(menuList=menuList)</t>
 <t tx="yen.20200420153541.1"># set default value of the variables accordingly
 @app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
 @app.route('/show_entries/&lt;int:page&gt;', defaults={'item_per_page': 10})
@@ -1228,8 +1259,13 @@ def show_entries(page, item_per_page):
     cur = g.db.execute(query_string)
     grouping = [dict(id=row[0], user=row[1], date=row[2], result=row[3], memo=row[4]) for row in cur.fetchall()]
     totalpage = math.ceil(total_number/int(item_per_page))
-    return render_template('show_entries.html' , grouping = grouping, total_number=total_number, \
-                    page=page, item_per_page=item_per_page, totalpage=totalpage)
+    login = session.get('login')
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    showEntriesTemplate = template_lookup.get_template("show_entries.html")
+    return showEntriesTemplate.render(login=login, grouping = grouping, \
+                        total_number=total_number, page=page, \
+                        item_per_page=item_per_page, totalpage=totalpage)             
+    
 </t>
 <t tx="yen.20200420153612.1">@app.route('/add_entry',methods=['POST'])
 @login_required
@@ -2740,5 +2776,98 @@ def filegdupload():
     '''
     return "files uploaded!"
     </t>
+<t tx="yen.20200529215216.1">from oauth2client.client import flow_from_clientsecrets
+import httplib2
+from apiclient.discovery import build
+from oauth2client.file import Storage
+import webbrowser
+
+def get_credentials():
+    scope = 'https://www.googleapis.com/auth/blogger'
+    flow = flow_from_clientsecrets(
+        'client_secrets.json', scope,
+        redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+    storage = Storage('credentials.dat')
+    credentials = storage.get()
+
+    if  not credentials or credentials.invalid:
+        auth_uri = flow.step1_get_authorize_url()
+        webbrowser.open(auth_uri)
+        auth_code = input('Enter the auth code: ')
+        credentials = flow.step2_exchange(auth_code)
+        storage.put(credentials)
+    return credentials
+
+def get_service():
+    """Returns an authorised blogger api service."""
+    credentials = get_credentials()
+    http = httplib2.Http()
+    http = credentials.authorize(http)
+    service = build('blogger', 'v3', http=http)
+    return service
+
+if __name__ == '__main__':
+    served = get_service()
+    blogs = served.blogs()
+    blog_get_obj = blogs.get(blogId='123456789123456')
+    details = blog_get_obj.execute()
+    print(details)</t>
+<t tx="yen.20200529215344.1">import os
+import pickle
+
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+
+SCOPES = ['https://www.googleapis.com/auth/calendar.readonly', ]
+
+
+# we check if the file to store the credentials exists
+if not os.path.exists('credentials.dat'):
+
+    flow = InstalledAppFlow.from_client_secrets_file('client_id.json', SCOPES)
+    credentials = flow.run_local_server()
+
+    with open('credentials.dat', 'wb') as credentials_dat:
+        pickle.dump(credentials, credentials_dat)
+else:
+    with open('credentials.dat', 'rb') as credentials_dat:
+        credentials = pickle.load(credentials_dat)
+
+if credentials.expired:
+    credentials.refresh(Request())
+
+calendar_sdk = build('calendar', 'v3', credentials=credentials)
+
+calendars_get_params = {
+        'calendarId': 'primary',
+    }
+
+test = calendar_sdk.calendars().get(**calendars_get_params).execute()
+print(test)</t>
+<t tx="yen.20200531203803.1">https://stackoverflow.com/questions/8287628/proxies-with-python-requests-module
+
+# url to get the student number data
+target_url = "http://mde.tw/cd2020/downloads/2020spring_cd_2a_list.txt"
+# use requests to retrieve data from url
+proxyDict = { "http": "http://proxy_server:port" }
+try:
+    f = requests.get(target_url)
+except:
+    f = requests.get(target_url, proxies=proxyDict)</t>
+<t tx="yen.20200531204210.1">https://getbootstrap.com/
+
+https://www.tutorialspoint.com/bootstrap4/index.htm
+
+https://pikock.github.io/bootstrap-magic/
+
+https://themestr.app/builder
+
+http://shoelace.io/
+
+https://bootsnipp.com/buttons</t>
+<t tx="yen.20200601193216.1">https://www.makotemplates.org/
+
+雖然 Mako 可以與 Jinja2 同時存在, 但仍希望逐步改為 Mako based</t>
 </tnodes>
 </leo_file>

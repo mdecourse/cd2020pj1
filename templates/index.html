@@ -1,8 +1,8 @@
-{# index.html #}
-{% extends "base.html" %}
-{% block body %}
+## index.html
+<%inherit file="base.html"/>
 
-    <!--Links to the login handler-->
-    Login with <a href="login/google">google</a>.<br />
+<%block name="header">
+    <!-- this is some header content -->
+</%block>
 
-{% endblock %}
+<!-- this is the body content. -->

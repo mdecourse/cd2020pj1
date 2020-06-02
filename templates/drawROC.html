@@ -1,5 +1,9 @@
-{% extends "base.html" %}
-{% block body %}
+## drawROC.html
+<%inherit file="base.html"/>
+
+<%block name="header">
+    <!-- this is some header content -->
+</%block>
 
     <div id="wrapper">
       <canvas id="canvas" width="300" height="200"></canvas>
@@ -10,5 +14,3 @@
     </div>
     <!-- need to put .js after the canvas tag -->
     <script src="/static/drawROC.js"></script>
-    
-{% endblock %}

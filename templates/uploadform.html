@@ -1,5 +1,10 @@
-{% extends "base.html" %}
-{% block body %}
+<%inherit file="base.html"/>
+
+<%block name="header">
+    <!-- this is some header content -->
+</%block>
+
+<!-- this is the body content. -->
 
 <h1>file upload</h1>
 <script src="/static/jquery.js" type="text/javascript"></script>
@@ -8,5 +13,3 @@
 <div class="prova"></div>
 <input type="button" onclick="$('.prova').axuploader('disable')" value="asd" />
 <input type="button" onclick="$('.prova').axuploader('enable')" value="ok" />
-    
-{% endblock %}

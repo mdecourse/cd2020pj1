@@ -1,9 +1,10 @@
-{% extends "base.html" %}
-{% block body %}
+<%inherit file="base.html"/>
 
-    <!-- # https://mde.tw/cd2020pj1 -->
-    your guess is {{ guess }}
+<%block name="header">
+    <!-- this is some header content -->
+</%block>
+
+<!-- this is the body content. -->
+    your guess is ${ guess }
     <br />
     <a href="/guessform">guessform</a>
-
-{% endblock %}

@@ -47,13 +47,19 @@ import pickle
 import codecs
 import json
 
+# for mako template engine
+# for mako template 系統
+from mako.template import Template
+from mako.lookup import TemplateLookup
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
 # 確定程式檔案所在目錄, 在 Windows 有最後的反斜線
 _curdir = os.path.join(os.getcwd(), os.path.dirname(__file__))
 download_dir = _curdir + "/downloads/"
-
+template_root_dir = _curdir + "/templates"
+    
 app = Flask(__name__)
 
 # 使用 session 必須要設定 secret_key
@@ -106,13 +112,17 @@ def login_required(f):
 @app.route('/drawROC')
 @login_required
 def drawROC():
-    return render_template("drawROC.html")
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    rocTemplate = template_lookup.get_template("drawROC.html")
+    return rocTemplate.render()
     
 @app.route("/menu")
 @login_required
 def menu():
     menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list"]
-    return render_template("menu.html", menuList=menuList)
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    menuTemplate = template_lookup.get_template("menu.html")
+    return menuTemplate.render(menuList=menuList)
 # setup static directory
 @app.route('/static/<path:path>')
 def send_static(path):
@@ -133,7 +143,9 @@ def guess():
     session['count'] = thecount
     user = session.get('user')
 
-    return render_template("guess.html", answer=theanswer, count=thecount, user=user)
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    guessTemplate = template_lookup.get_template("guess.html")
+    return guessTemplate.render(answer=theanswer, count=thecount, user=user)
 
 
 @app.route('/user/<name>')
@@ -154,10 +166,14 @@ def guessform():
     guess = session.get("guess")
     theanswer = session.get("answer")
     count = session.get("count")
-    return render_template("guessform.html", guess=guess, answer=theanswer, count=count)
+    
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    guessTemplate = template_lookup.get_template("guessform.html")
+    return guessTemplate.render(guess=guess, answer=theanswer, count=count)
 @app.route('/docheck', methods=['POST'])
 @login_required
 def docheck():
+    template_lookup = TemplateLookup(directories=[template_root_dir])
     if not session.get('login'):
         return redirect(url_for('index'))
     # use session[] to save data
@@ -182,16 +198,20 @@ def docheck():
     session["count"] += 1
     count = session.get("count")
     # compare the answer and the guess value
+    tooBigTemplate = template_lookup.get_template("toobig.html")
+    tooSmallTemplate = template_lookup.get_template("toosmall.html")
     if theanswer < theguess:
-        return render_template("toobig.html", guess=guess, answer=theanswer, count=count)
+        return tooBigTemplate.render(guess=guess, answer=theanswer, count=count)
     elif theanswer > theguess:
-        return render_template("toosmall.html", guess=guess, answer=theanswer, count=count)
+        return tooSmallTemplate.render(guess=guess, answer=theanswer, count=count)
     else:
         # 
         # got the answer, get count from session
         thecount = session.get('count')
         return "Guess "+str(thecount)+" times, finally got the answer, the answer is "+str(theanswer)+": <a href='/guess'>Play again</a>"
-    return render_template("docheck.html", guess=guess)
+
+    doCheckTemplate = template_lookup.get_template("docheck.html")
+    return doCheckTemplate.render(guess=guess)
  
 @app.route("/randomgrouping")
 @login_required
@@ -301,8 +321,13 @@ def show_entries(page, item_per_page):
     cur = g.db.execute(query_string)
     grouping = [dict(id=row[0], user=row[1], date=row[2], result=row[3], memo=row[4]) for row in cur.fetchall()]
     totalpage = math.ceil(total_number/int(item_per_page))
-    return render_template('show_entries.html' , grouping = grouping, total_number=total_number, \
-                    page=page, item_per_page=item_per_page, totalpage=totalpage)
+    login = session.get('login')
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    showEntriesTemplate = template_lookup.get_template("show_entries.html")
+    return showEntriesTemplate.render(login=login, grouping = grouping, \
+                        total_number=total_number, page=page, \
+                        item_per_page=item_per_page, totalpage=totalpage)             
+    
 # get the distributed list among each group
 def getNumList(total, eachGrp=10):
     # total is the number of students
@@ -333,8 +358,11 @@ def getNumList(total, eachGrp=10):
     return splits;
 @app.route('/')
 # root of the system can not set "login_required" decorator
+# 開始改用 Make 作為 Template
 def index():
-    return render_template('index.html')
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    indexTemplate = template_lookup.get_template("index.html")
+    return indexTemplate.render()
 @app.route('/alogin' , methods=['GET' , 'POST'])
 def alogin():
     error = None
@@ -369,12 +397,12 @@ def login(provider_name):
         loginUser = result.user.email.split("@")[0]
         session["user"] = loginUser
         session["login"] = True
-        
+        template_lookup = TemplateLookup(directories=[template_root_dir])
+        loginTemplate = template_lookup.get_template("login.html")
         CALLBACK_URL = "https://localhost:8443/menu"
-    
-        # The rest happens inside the template.
-        return render_template('login.html', result=result, CALLBACK_URL=CALLBACK_URL)
-    
+        
+        return loginTemplate.render(result=result, CALLBACK_URL=CALLBACK_URL)
+
     # Don't forget to return the response.
     return response
 @app.route('/logout')
@@ -453,7 +481,9 @@ def fileuploadform(edit):
     '''
     準備改寫為 template 傳回上傳表單, 或加上其他相關欄位
     '''
-    return render_template("uploadform.html")
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    uploadFormTemplate = template_lookup.get_template("uploadform.html")
+    return uploadFormTemplate.render()
 
 
 

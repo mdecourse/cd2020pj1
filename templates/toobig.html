@@ -1,9 +1,10 @@
+## toobig.html
+<%inherit file="base.html"/>
 
-{% block body %}
-    <!-- # https://mde.tw/cd2020pj1 -->
+<%block name="header">
+    <!-- this is some header content -->
+</%block>
     Too big, guess again
     <br />
-    {# need to get the needed variables for guessform.html from docheck render_template #}
-    {% include 'guessform.html' %}
-    
-{% endblock %}
+    ## need to get the needed variables for guessform.html from docheck render_template
+    <%include file="guessform.html" />

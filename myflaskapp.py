@@ -376,7 +376,10 @@ def alogin():
             session['user'] = "alogin"
             flash('已經登入!')
             return redirect(url_for('menu'))
-    return render_template('alogin.html' , error = error)
+    #return render_template('alogin.html' , error = error)
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    aloginTemplate = template_lookup.get_template("alogin.html")
+    return aloginTemplate.render()
 @app.route('/login/<provider_name>/', methods=['GET', 'POST'])
 def login(provider_name):
     

@@ -1,8 +1,11 @@
-{% extends "base.html" %}
-{% block body %}
+## alogin.html
+<%inherit file="base.html"/>
+
   <h2>ALogin</h2>
-  {% if error %}<p class=error><strong>Error:</strong> {{ error }}{% endif %}
-  <form action="{{ url_for('alogin') }}" method=post>
+  % if error:
+      <p class=error><strong>Error:</strong> ${ error }
+  % endif
+  <form action="/alogin" method=post>
     <dl>
       <dt>Username:
       <dd><input type=text name=username>
@@ -11,4 +14,4 @@
       <dd><input type=submit value=Login>
     </dl>
   </form>
-{% endblock %}
+

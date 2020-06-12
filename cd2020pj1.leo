@@ -1296,8 +1296,10 @@ def alogin():
             session['user'] = "alogin"
             flash('已經登入!')
             return redirect(url_for('menu'))
-    return render_template('alogin.html' , error = error)
-</t>
+    #return render_template('alogin.html' , error = error)
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    aloginTemplate = template_lookup.get_template("alogin.html")
+    return aloginTemplate.render()</t>
 <t tx="yen.20200423213714.1">from flask import Flask
 
 app = Flask(__name__)

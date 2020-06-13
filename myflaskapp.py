@@ -52,6 +52,9 @@ import json
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
+# for pypdf2
+from PyPDF2 import PdfFileWriter, PdfFileReader
+
 # Instantiate Authomatic.
 authomatic = Authomatic(CONFIG, 'A0Zr9@8j/3yX R~XHH!jmN]LWX/,?R@T', report_errors=False)
 
@@ -119,7 +122,7 @@ def drawROC():
 @app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list"]
+    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list", "pdf_list"]
     template_lookup = TemplateLookup(directories=[template_root_dir])
     menuTemplate = template_lookup.get_template("menu.html")
     return menuTemplate.render(menuList=menuList)
@@ -376,10 +379,12 @@ def alogin():
             session['user'] = "alogin"
             flash('已經登入!')
             return redirect(url_for('menu'))
-    #return render_template('alogin.html' , error = error)
+    # jinja template
+    #return render_template('alogin.html' , error=error)
+    # mako template
     template_lookup = TemplateLookup(directories=[template_root_dir])
     aloginTemplate = template_lookup.get_template("alogin.html")
-    return aloginTemplate.render()
+    return aloginTemplate.render(error=error)
 @app.route('/login/<provider_name>/', methods=['GET', 'POST'])
 def login(provider_name):
     
@@ -641,6 +646,214 @@ def download_list():
     return "<h1>Download List</h1>" + outstring + "<br/><br /></body></html>"
 
 
+@app.route('/pdf_list', methods=['GET'])
+@login_required
+def pdf_list():
+    '''
+    準備改寫為 template based
+    應該只能選一個 pdf 檔案
+    https://www.codexworld.com/how-to/allow-only-one-checkbox-to-be-checked-jquery/
+    '''
+
+    """List pdf files in downloads directory
+    """
+
+    if not request.args.get('edit'):
+        edit= 1
+    else:
+        edit = request.args.get('edit')
+    if not request.args.get('page'):
+        page = 1
+    else:
+        page = request.args.get('page')
+    if not request.args.get('item_per_page'):
+        item_per_page = 10
+    else:
+        item_per_page = request.args.get('item_per_page')
+    if not request.args.get('keyword'):
+        keyword = ""
+    else:
+        keyword = request.args.get('keyword')
+        session['download_keyword'] = keyword
+
+    # 只列出 .pdf 檔案
+    files = [i for i in os.listdir(download_dir) if i.endswith('.pdf')]
+    
+    if keyword != "":
+        files = [elem for elem in files if str(keyword) in elem]
+    files.sort()
+    total_rows = len(files)
+    totalpage = math.ceil(total_rows/int(item_per_page))
+    starti = int(item_per_page) * (int(page) - 1) + 1
+    endi = starti + int(item_per_page) - 1
+    outstring = "<form method='post' action='edit_pdf'>"
+    notlast = False
+    if total_rows > 0:
+        outstring += "<br />"
+        if (int(page) * int(item_per_page)) < total_rows:
+            notlast = True
+        if int(page) > 1:
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=1&amp;item_per_page=" + str(item_per_page) + \
+                                "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'><<</a> "
+            page_num = int(page) - 1
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=" + str(page_num) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Previous</a> "
+
+        span = 10
+
+        for index in range(int(page)-span, int(page)+span):
+            if index>= 0 and index< totalpage:
+                page_now = index + 1 
+                if page_now == int(page):
+                    outstring += "<font size='+1' color='red'>" + str(page) + " </font>"
+                else:
+                    outstring += "<a href='"
+                    outstring += "download_list?&amp;page=" + str(page_now) + "&amp;item_per_page=" + \
+                                        str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+                    outstring += "'>"+str(page_now) + "</a> "
+
+        if notlast == True:
+            nextpage = int(page) + 1
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(nextpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Next</a>"
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(totalpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>>></a><br /><br />"
+
+        if (int(page) * int(item_per_page)) < total_rows:
+            notlast = True
+            outstring += downloadlist_access_list(files, starti, endi) + "<br />"
+        else:
+            outstring += "<br /><br />"
+            outstring += downloadlist_access_list(files, starti, total_rows) + "<br />"
+
+        if int(page) > 1:
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=1&amp;item_per_page=" + str(item_per_page) + \
+                                "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'><<</a> "
+            page_num = int(page) - 1
+            outstring += "<a href='"
+            outstring += "download_list?&amp;page=" + str(page_num) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Previous</a> "
+
+        span = 10
+
+        for index in range(int(page)-span, int(page)+span):
+        #for ($j=$page-$range;$j<$page+$range;$j++)
+            if index >=0 and index < totalpage:
+                page_now = index + 1
+                if page_now == int(page):
+                    outstring += "<font size='+1' color='red'>" + str(page)+" </font>"
+                else:
+                    outstring += "<a href='"
+                    outstring += "download_list?&amp;page=" + str(page_now) + \
+                                        "&amp;item_per_page=" + str(item_per_page) + \
+                                        "&amp;keyword=" + str(session.get('download_keyword'))
+                    outstring += "'>" + str(page_now)+"</a> "
+
+        if notlast == True:
+            nextpage = int(page) + 1
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(nextpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>Next</a>"
+            outstring += " <a href='"
+            outstring += "download_list?&amp;page=" + str(totalpage) + "&amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'>>></a>"
+    else:
+        outstring += "no data!"
+    outstring += "<br /><br /><input type='submit' value='edit'><input type='reset' value='reset'></form>"
+    # 使用 jquery 確定只能選一個 pdf 檔案
+    # https://stackoverflow.com/questions/9709209/html-select-only-one-checkbox-in-a-group
+    outstring += '''<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script>$('input[type="checkbox"]').on('change', function() {
+    $('input[name="' + this.name + '"]').not(this).prop('checked', false);
+});</script>'''
+
+
+    return "<h1>PDF List</h1>" + outstring + "<br/><br /></body></html>"
+
+
+@app.route('/edit_pdf', methods=['POST'])
+@login_required
+def edit_pdf():
+
+    """Delete user uploaded files
+    """
+    # use request.form.getlist() allow multiple select
+    filename = request.form.getlist('filename')
+
+    if filename is None:
+        outstring = "no file selected!"
+        return "<h1>Edit pdf file Error</h1>" + \
+                   outstring + "<br/><br /></body></html>"
+    outstring = "split this pdf file?<br /><br />"
+    outstring += "<form method='post' action='doEditPdf'>"
+    # only one file is selected
+    # 編修 pdf 應該只能選一個檔案.
+    if isinstance(filename, str):
+        outstring += filename + "<input type='hidden' name='filename' value='" + \
+                            filename + "'><br />"
+    else:
+        # multiple files selected
+        for index in range(len(filename)):
+            outstring += filename[index] + "<input type='hidden' name='filename' value='" + \
+                                filename[index]+"'><br />"
+    # 這裡要加上分割 pdf 檔案後的存檔名輸入欄位
+    # 以及 from and to 的頁面編號, 總共三個 input fields
+    outstring += "分割後檔案名稱: <input type='text' name='newFileName'></input><br />"
+    outstring += "起始 page: <input type='text' name='fromPage'></input><br />"
+    outstring += "終止 page: <input type='text' name='toPage'></input><br />"
+    outstring += "<br /><input type='submit' value='edit'></form><br />"
+
+    return "<h1>Edit PDF</h1>" + \
+               outstring + "<br/><br /></body></html>"
+
+
+@app.route('/doEditPdf', methods=['POST'])
+@login_required
+def doEditPdf():
+
+    """Action to split user uploaded files
+    """
+
+    pdfFileName = request.form['filename']
+    newFileName = request.form['newFileName']
+    # 將表單中的頁數字串轉為整數
+    fromPage = int(request.form['fromPage'])
+    toPage = int(request.form['toPage'])
+    pdfReader = PdfFileReader(open(download_dir + pdfFileName, "rb"))
+    information = [(newFileName, fromPage, toPage)]
+     
+    for page in range(len(information)):
+        pdf_writer = PdfFileWriter()
+        start = information[page][1]
+        end = information[page][2]
+        while start<=end:
+            pdf_writer.addPage(pdfReader.getPage(start-1))
+            start+=1
+        if not os.path.exists("./"):
+            os.makedirs(savepath)
+        output_filename = '{}_{}_page_{}.pdf'.format(information[page][0], information[page][1], information[page][2])
+        with open(download_dir + output_filename,'wb') as out:
+            pdf_writer.write(out)
+
+    outstring = "已經將 " + pdfFileName + " 中的第 " + str(fromPage) + " 到第 " + str(toPage) + "頁, 存為 " + output_filename
+
+    return "<h1>Split PDF file completed</h1>" + \
+               outstring + "<br/><br /></body></html>"
+
+
 def downloadlist_access_list(files, starti, endi):
     
     """List files function for download_list
@@ -860,6 +1073,28 @@ def uploadToGdrive3(fileName, mimeType):
     fileID = gdFile.get("id")
 
     return fileID
+# pypdf2_ex1.py
+#import os
+#from PyPDF2 import PdfFileWriter, PdfFileReader
+
+@app.route('/pdf1' , methods=['GET' , 'POST'])
+def pdf1():
+    pdfReader = PdfFileReader(open(download_dir + "2020_Book_LearnTensorFlow20.pdf", "rb"))
+    information = [("w15_tensorflow",18,45)]
+     
+    for page in range(len(information)):
+        pdf_writer = PdfFileWriter()
+        start = information[page][1]
+        end = information[page][2]
+        while start<=end:
+            pdf_writer.addPage(pdfReader.getPage(start-1))
+            start+=1
+        if not os.path.exists("./"):
+            os.makedirs(savepath)
+        output_filename = '{}_{}_page_{}.pdf'.format(information[page][0],information[page][1], information[page][2])
+        with open(download_dir + output_filename,'wb') as out:
+            pdf_writer.write(out)
+    return "已經完成 pdf 切割與存檔"
 
 if __name__ == "__main__":
     app.run()

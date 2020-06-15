@@ -35,16 +35,14 @@
           <tr>
           <td width="150">user</td>
           <td width="150">date</td>
-          <td width="150">title</td>
-          <td width="150">content</td>
+          <td width="150">result</td>
           <td width="150">memo</td>
           </tr>
-          % for entry in forum:
+          % for entry in grouping:
             <tr>
             <td>${ entry['user'] }</td>
             <td>${ entry['date'] }</td>
-            <td>${ entry['title'] }</td>
-            <td>${ entry['content'] }</td>
+            <td>${ entry['result'] }</td>
             <td><a href="/edit/${entry['id'] }">edit</a>  |  <a href="/delete/${ entry['id'] }">delete</a></td>
             <td>${ entry['memo'] }</td>
           % endfor

@@ -89,6 +89,7 @@
 <v t="yen.20200519160558.1"><vh>PyGithub</vh></v>
 <v t="yen.20200419155906.1"><vh>Database</vh>
 <v t="yen.20200419155956.1"><vh>@edit schema.sql</vh></v>
+<v t="yen.20200615225847.1"><vh>@edit forum_schema.sql</vh></v>
 <v t="yen.20200419160014.1"><vh>@button create db</vh></v>
 <v t="leo.20200311104947.1"><vh>use pybean.py to connect to SQLite</vh></v>
 <v t="yen.20200419201709.1"><vh>use sqlite3 to save data to SQLite</vh></v>
@@ -114,9 +115,12 @@
 <v t="amd.20151021000403.1"><vh>guessform</vh></v>
 <v t="amd.20151021000629.1"><vh>docheck</vh></v>
 <v t="leo.20200409151441.1"><vh>randomGrouping</vh></v>
+<v t="yen.20200615230001.1"><vh>threadform</vh></v>
+<v t="yen.20200615230532.1"><vh>addThread</vh></v>
 <v t="yen.20200420153612.1"><vh>add_entry</vh></v>
-<v t="yen.20200420153541.1"><vh>show_entries</vh></v>
+<v t="yen.20200420153541.1"><vh>show_group_entries</vh></v>
 <v t="leo.20200409151603.1"><vh>getNumList</vh></v>
+<v t="yen.20200615230215.1"><vh>show_entries</vh></v>
 <v t="yen.20200414111904.1"><vh>index</vh></v>
 <v t="yen.20200423112001.1"><vh>alogin</vh></v>
 <v t="yen.20200414111938.1"><vh>login</vh></v>
@@ -127,9 +131,12 @@
 <v t="yen.20200519105132.1"><vh>download</vh></v>
 <v t="yen.20200519105414.1"><vh>downloads</vh></v>
 <v t="yen.20200519105439.1"><vh>download_list</vh></v>
-<v t="leo.20200613133948.1"><vh>pdf_list</vh></v>
-<v t="leo.20200613134313.1"><vh>edit_pdf</vh></v>
-<v t="leo.20200613134545.1"><vh>doEditPdf</vh></v>
+<v t="leo.20200613133948.1"><vh>split_pdf_list</vh></v>
+<v t="yen.20200615224618.1"><vh>combine_pdf_list</vh></v>
+<v t="leo.20200613134313.1"><vh>split_pdf</vh></v>
+<v t="yen.20200615224637.1"><vh>combine_pdf</vh></v>
+<v t="leo.20200613134545.1"><vh>doSplitPdf</vh></v>
+<v t="yen.20200615224654.1"><vh>doCombinePdf</vh></v>
 <v t="yen.20200519105625.1"><vh>downloadlist_access_list</vh></v>
 <v t="yen.20200519110307.1"><vh>sizeof_fmt</vh></v>
 <v t="yen.20200519110530.1"><vh>delete_file</vh></v>
@@ -149,7 +156,9 @@
 </v>
 <v t="amd.20151020234043.1"><vh>@path templates</vh>
 <v t="yen.20200419213847.1"><vh>@edit drawROC.html</vh></v>
-<v t="yen.20200420154412.1"><vh>@edit show_entries.html</vh></v>
+<v t="yen.20200420154412.1"><vh>@edit show_group_entries.html</vh></v>
+<v t="yen.20200615230731.1"><vh>@edit show_entries.html</vh></v>
+<v t="yen.20200615230035.1"><vh>@edit threadform.html</vh></v>
 <v t="yen.20200420154310.1"><vh>@edit layout.html</vh></v>
 <v t="amd.20151020234049.1"><vh>@edit guess.html</vh></v>
 <v t="amd.20151020234120.1"><vh>@edit user.html</vh></v>
@@ -833,9 +842,9 @@ def pdf1():
         with open(download_dir + output_filename,'wb') as out:
             pdf_writer.write(out)
     return "已經完成 pdf 切割與存檔"</t>
-<t tx="leo.20200613133948.1">@app.route('/pdf_list', methods=['GET'])
+<t tx="leo.20200613133948.1">@app.route('/split_pdf_list', methods=['GET'])
 @login_required
-def pdf_list():
+def split_pdf_list():
     '''
     準備改寫為 template based
     應該只能選一個 pdf 檔案
@@ -873,7 +882,7 @@ def pdf_list():
     totalpage = math.ceil(total_rows/int(item_per_page))
     starti = int(item_per_page) * (int(page) - 1) + 1
     endi = starti + int(item_per_page) - 1
-    outstring = "&lt;form method='post' action='edit_pdf'&gt;"
+    outstring = "&lt;form method='post' action='split_pdf'&gt;"
     notlast = False
     if total_rows &gt; 0:
         outstring += "&lt;br /&gt;"
@@ -959,7 +968,7 @@ def pdf_list():
             outstring += "'&gt;&gt;&gt;&lt;/a&gt;"
     else:
         outstring += "no data!"
-    outstring += "&lt;br /&gt;&lt;br /&gt;&lt;input type='submit' value='edit'&gt;&lt;input type='reset' value='reset'&gt;&lt;/form&gt;"
+    outstring += "&lt;br /&gt;&lt;br /&gt;&lt;input type='submit' value='split'&gt;&lt;input type='reset' value='reset'&gt;&lt;/form&gt;"
     # 使用 jquery 確定只能選一個 pdf 檔案
     # https://stackoverflow.com/questions/9709209/html-select-only-one-checkbox-in-a-group
     outstring += '''&lt;script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"&gt;&lt;/script&gt;
@@ -968,13 +977,13 @@ def pdf_list():
 });&lt;/script&gt;'''
 
 
-    return "&lt;h1&gt;PDF List&lt;/h1&gt;" + outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
+    return "&lt;h1&gt;split PDF List&lt;/h1&gt;" + outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
 
 
 </t>
-<t tx="leo.20200613134313.1">@app.route('/edit_pdf', methods=['POST'])
+<t tx="leo.20200613134313.1">@app.route('/split_pdf', methods=['POST'])
 @login_required
-def edit_pdf():
+def split_pdf():
 
     """Delete user uploaded files
     """
@@ -986,7 +995,7 @@ def edit_pdf():
         return "&lt;h1&gt;Edit pdf file Error&lt;/h1&gt;" + \
                    outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
     outstring = "split this pdf file?&lt;br /&gt;&lt;br /&gt;"
-    outstring += "&lt;form method='post' action='doEditPdf'&gt;"
+    outstring += "&lt;form method='post' action='doSplitPdf'&gt;"
     # only one file is selected
     # 編修 pdf 應該只能選一個檔案.
     if isinstance(filename, str):
@@ -1002,16 +1011,16 @@ def edit_pdf():
     outstring += "分割後檔案名稱: &lt;input type='text' name='newFileName'&gt;&lt;/input&gt;&lt;br /&gt;"
     outstring += "起始 page: &lt;input type='text' name='fromPage'&gt;&lt;/input&gt;&lt;br /&gt;"
     outstring += "終止 page: &lt;input type='text' name='toPage'&gt;&lt;/input&gt;&lt;br /&gt;"
-    outstring += "&lt;br /&gt;&lt;input type='submit' value='edit'&gt;&lt;/form&gt;&lt;br /&gt;"
+    outstring += "&lt;br /&gt;&lt;input type='submit' value='split'&gt;&lt;/form&gt;&lt;br /&gt;"
 
     return "&lt;h1&gt;Edit PDF&lt;/h1&gt;" + \
                outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
 
 
 </t>
-<t tx="leo.20200613134545.1">@app.route('/doEditPdf', methods=['POST'])
+<t tx="leo.20200613134545.1">@app.route('/doSplitPdf', methods=['POST'])
 @login_required
-def doEditPdf():
+def doSplitPdf():
 
     """Action to split user uploaded files
     """
@@ -1380,7 +1389,7 @@ local_data/db/database.db
 '''
 import os
 
-os.system("sqlite3 db/database.db &lt; schema.sql")
+os.system("sqlite3 db/database.db &lt; forum_schema.sql")
 # echo string
 '''
 for Leo Editor:
@@ -1520,17 +1529,17 @@ def logout():
 <t tx="yen.20200420144030.1">@app.route("/menu")
 @login_required
 def menu():
-    menuList = ["guess", "drawROC", "randomgrouping", "show_entries", "fileuploadform", "download_list", "pdf_list"]
+    menuList = ["guess", "drawROC", "threadform", "show_entries", "fileuploadform", "download_list", "split_pdf_list", "combine_pdf_list"]
     template_lookup = TemplateLookup(directories=[template_root_dir])
     menuTemplate = template_lookup.get_template("menu.html")
     return menuTemplate.render(menuList=menuList)</t>
 <t tx="yen.20200420153541.1"># set default value of the variables accordingly
-@app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
-@app.route('/show_entries/&lt;int:page&gt;', defaults={'item_per_page': 10})
-@app.route('/show_entries/&lt;int:page&gt;/&lt;int:item_per_page&gt;')
+@app.route('/show_group_entries', defaults={'page': 1, 'item_per_page': 10})
+@app.route('/show_group_entries/&lt;int:page&gt;', defaults={'item_per_page': 10})
+@app.route('/show_group_entries/&lt;int:page&gt;/&lt;int:item_per_page&gt;')
 @login_required
 # 內定每頁顯示 10 筆資料, 從第1頁開始
-def show_entries(page, item_per_page):
+def show_group_entries(page, item_per_page):
     # 先取得資料總筆數
     cur = g.db.execute('select * from grouping;')
     total_number = len(cur.fetchall())
@@ -3153,5 +3162,249 @@ https://bootsnipp.com/buttons</t>
 <t tx="yen.20200601193216.1">https://www.makotemplates.org/
 
 雖然 Mako 可以與 Jinja2 同時存在, 但仍希望逐步改為 Mako based</t>
+<t tx="yen.20200615224618.1">@app.route('/combine_pdf_list', methods=['GET'])
+@login_required
+def combine_pdf_list():
+    '''
+    準備改寫為 template based
+    可以選擇多個檔案, 但必須按照特定順序排列
+    假如檔案眾多, 可能還必須動用 local-storage 暫存所選的檔案後, 再排列合併的順序
+    參考:
+    http://www.designchemical.com/blog/index.php/jquery/change-order-multiple-select-lists-using-jquery/
+    '''
+
+    """List pdf files in downloads directory
+    """
+
+    if not request.args.get('edit'):
+        edit= 1
+    else:
+        edit = request.args.get('edit')
+    if not request.args.get('page'):
+        page = 1
+    else:
+        page = request.args.get('page')
+    if not request.args.get('item_per_page'):
+        item_per_page = 10
+    else:
+        item_per_page = request.args.get('item_per_page')
+    if not request.args.get('keyword'):
+        keyword = ""
+    else:
+        keyword = request.args.get('keyword')
+        session['download_keyword'] = keyword
+
+    # 只列出 .pdf 檔案
+    files = [i for i in os.listdir(download_dir) if i.endswith('.pdf')]
+    
+    if keyword != "":
+        files = [elem for elem in files if str(keyword) in elem]
+    files.sort()
+    total_rows = len(files)
+    totalpage = math.ceil(total_rows/int(item_per_page))
+    starti = int(item_per_page) * (int(page) - 1) + 1
+    endi = starti + int(item_per_page) - 1
+    outstring = "&lt;form method='post' action='combine_pdf'&gt;"
+    notlast = False
+    if total_rows &gt; 0:
+        outstring += "&lt;br /&gt;"
+        if (int(page) * int(item_per_page)) &lt; total_rows:
+            notlast = True
+        if int(page) &gt; 1:
+            outstring += "&lt;a href='"
+            outstring += "download_list?&amp;amp;page=1&amp;amp;item_per_page=" + str(item_per_page) + \
+                                "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;&lt;&lt;&lt;/a&gt; "
+            page_num = int(page) - 1
+            outstring += "&lt;a href='"
+            outstring += "download_list?&amp;amp;page=" + str(page_num) + "&amp;amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;Previous&lt;/a&gt; "
+
+        span = 10
+
+        for index in range(int(page)-span, int(page)+span):
+            if index&gt;= 0 and index&lt; totalpage:
+                page_now = index + 1 
+                if page_now == int(page):
+                    outstring += "&lt;font size='+1' color='red'&gt;" + str(page) + " &lt;/font&gt;"
+                else:
+                    outstring += "&lt;a href='"
+                    outstring += "download_list?&amp;amp;page=" + str(page_now) + "&amp;amp;item_per_page=" + \
+                                        str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+                    outstring += "'&gt;"+str(page_now) + "&lt;/a&gt; "
+
+        if notlast == True:
+            nextpage = int(page) + 1
+            outstring += " &lt;a href='"
+            outstring += "download_list?&amp;amp;page=" + str(nextpage) + "&amp;amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;Next&lt;/a&gt;"
+            outstring += " &lt;a href='"
+            outstring += "download_list?&amp;amp;page=" + str(totalpage) + "&amp;amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;&gt;&gt;&lt;/a&gt;&lt;br /&gt;&lt;br /&gt;"
+
+        if (int(page) * int(item_per_page)) &lt; total_rows:
+            notlast = True
+            outstring += downloadlist_access_list(files, starti, endi) + "&lt;br /&gt;"
+        else:
+            outstring += "&lt;br /&gt;&lt;br /&gt;"
+            outstring += downloadlist_access_list(files, starti, total_rows) + "&lt;br /&gt;"
+
+        if int(page) &gt; 1:
+            outstring += "&lt;a href='"
+            outstring += "download_list?&amp;amp;page=1&amp;amp;item_per_page=" + str(item_per_page) + \
+                                "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;&lt;&lt;&lt;/a&gt; "
+            page_num = int(page) - 1
+            outstring += "&lt;a href='"
+            outstring += "download_list?&amp;amp;page=" + str(page_num) + "&amp;amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;Previous&lt;/a&gt; "
+
+        span = 10
+
+        for index in range(int(page)-span, int(page)+span):
+        #for ($j=$page-$range;$j&lt;$page+$range;$j++)
+            if index &gt;=0 and index &lt; totalpage:
+                page_now = index + 1
+                if page_now == int(page):
+                    outstring += "&lt;font size='+1' color='red'&gt;" + str(page)+" &lt;/font&gt;"
+                else:
+                    outstring += "&lt;a href='"
+                    outstring += "download_list?&amp;amp;page=" + str(page_now) + \
+                                        "&amp;amp;item_per_page=" + str(item_per_page) + \
+                                        "&amp;amp;keyword=" + str(session.get('download_keyword'))
+                    outstring += "'&gt;" + str(page_now)+"&lt;/a&gt; "
+
+        if notlast == True:
+            nextpage = int(page) + 1
+            outstring += " &lt;a href='"
+            outstring += "download_list?&amp;amp;page=" + str(nextpage) + "&amp;amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;Next&lt;/a&gt;"
+            outstring += " &lt;a href='"
+            outstring += "download_list?&amp;amp;page=" + str(totalpage) + "&amp;amp;item_per_page=" + \
+                                str(item_per_page) + "&amp;amp;keyword=" + str(session.get('download_keyword'))
+            outstring += "'&gt;&gt;&gt;&lt;/a&gt;"
+    else:
+        outstring += "no data!"
+    outstring += "&lt;br /&gt;&lt;br /&gt;&lt;input type='submit' value='combine'&gt;&lt;input type='reset' value='reset'&gt;&lt;/form&gt;"
+    return "&lt;h1&gt;combine PDF List&lt;/h1&gt;" + outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
+
+
+</t>
+<t tx="yen.20200615224637.1">@app.route('/combine_pdf', methods=['POST'])
+@login_required
+def combine_pdf():
+
+    """Delete user uploaded files
+    """
+    # use request.form.getlist() allow multiple select
+    filename = request.form.getlist('filename')
+
+    if filename is None:
+        outstring = "no file selected!"
+        return "&lt;h1&gt;Edit pdf file Error&lt;/h1&gt;" + \
+                   outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
+    outstring = "combine these pdf files?&lt;br /&gt;&lt;br /&gt;"
+    outstring += "&lt;form method='post' action='doCombinePdf'&gt;"
+    # 合併可以選擇多個檔案
+    if isinstance(filename, str):
+        outstring += filename + "&lt;input type='hidden' name='filename' value='" + \
+                            filename + "'&gt;&lt;br /&gt;"
+    else:
+        # multiple files selected
+        for index in range(len(filename)):
+            outstring += filename[index] + "&lt;input type='hidden' name='filename' value='" + \
+                                filename[index]+"'&gt;&lt;br /&gt;"
+    # 這裡輸入合併後的檔案名稱
+    outstring += "合併後檔案名稱: &lt;input type='text' name='newFileName'&gt;&lt;/input&gt;&lt;br /&gt;"
+    outstring += "&lt;br /&gt;&lt;input type='submit' value='combine'&gt;&lt;/form&gt;&lt;br /&gt;"
+
+    return "&lt;h1&gt;Combine PDF&lt;/h1&gt;" + \
+               outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
+
+
+</t>
+<t tx="yen.20200615224654.1">@app.route('/doCombinePdf', methods=['POST'])
+@login_required
+def doCombinePdf():
+
+    """Action to split user uploaded files
+    """
+    pdf_write_object = PdfFileWriter()
+
+    pdfFileNames = request.form.getlist('filename')
+    newFileName = request.form['newFileName']
+    filenameString = ""
+    
+    for filename in pdfFileNames:
+        pdf_read_object = PdfFileReader(open(download_dir + filename, "rb"))
+        filenameString += filename + ", "
+        for page in range(pdf_read_object.numPages):
+            pdf_write_object.addPage(pdf_read_object.getPage(page))
+     
+    final_file_object = open(download_dir + newFileName + ".pdf", 'wb')
+    pdf_write_object.write(final_file_object)
+    final_file_object.close()
+
+    outstring = "已經將 " + filenameString+ " 合併為: "+ newFileName + ".pdf"
+
+    return "&lt;h1&gt;Split PDF file completed&lt;/h1&gt;" + \
+               outstring + "&lt;br/&gt;&lt;br /&gt;&lt;/body&gt;&lt;/html&gt;"
+
+
+ 
+
+ 
+
+
+</t>
+<t tx="yen.20200615230001.1">@login_required
+@app.route('/threadform')
+def threadform():
+    # 可以討論時間在 form 產生, 或使用者按下 submit 後才產生
+    # date = datetime.datetime.now().strftime("%b %d, %Y - %H:%M:%S")
+    user = session.get("user")
+    
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    guessTemplate = template_lookup.get_template("threadform.html")
+    return guessTemplate.render(user=user)</t>
+<t tx="yen.20200615230215.1"># set default value of the variables accordingly
+@app.route('/show_entries', defaults={'page': 1, 'item_per_page': 10})
+@app.route('/show_entries/&lt;int:page&gt;', defaults={'item_per_page': 10})
+@app.route('/show_entries/&lt;int:page&gt;/&lt;int:item_per_page&gt;')
+@login_required
+# 內定每頁顯示 10 筆資料, 從第1頁開始
+def show_entries(page, item_per_page):
+    # 先取得資料總筆數
+    cur = g.db.execute('select * from forum;')
+    total_number = len(cur.fetchall())
+    query_string = 'select id, user, date, title, content, memo from forum order by id desc limit '+str(item_per_page)+' offset '+str((page-1)*item_per_page)
+    cur = g.db.execute(query_string)
+    forum = [dict(id=row[0], user=row[1], date=row[2], title = row[3], content=row[4], memo=row[5]) for row in cur.fetchall()]
+    totalpage = math.ceil(total_number/int(item_per_page))
+    login = session.get('login')
+    template_lookup = TemplateLookup(directories=[template_root_dir])
+    showEntriesTemplate = template_lookup.get_template("show_entries.html")
+    return showEntriesTemplate.render(login=login, forum=forum, \
+                        total_number=total_number, page=page, \
+                        item_per_page=item_per_page, totalpage=totalpage)             
+    
+</t>
+<t tx="yen.20200615230532.1">@app.route('/addThread',methods=['POST'])
+@login_required
+def addThread():
+    # 應該此時才取時間
+    date = datetime.datetime.now()
+    # 希望新增重複資料查驗功能
+    g.db.execute('insert into forum(user, date, title, content, memo) values (?, ?, ?, ?, ?)',
+            (request.form['user'], date, request.form['title'], request.form['content'], \
+            request.form['memo']))
+    g.db.commit()
+    flash('已經新增一筆資料!')
+    return redirect(url_for('show_entries'))</t>
 </tnodes>
 </leo_file>
